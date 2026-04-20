@@ -1,4 +1,4 @@
-from PyQt6.QtCore import QObject, pyqtSignal
+from PyQt6.QtCore import QObject, pyqtSignal, QTimer, Qt
 import cv2
 
 class CameraManager(QObject):
@@ -6,29 +6,41 @@ class CameraManager(QObject):
     
     def __init__(self):
         super().__init__()
-        self.running = True
+        self.camera = None
+        self.timer = None
         
     def start(self):
-        camera = cv2.VideoCapture(0) # default camera
-
-        while self.running:
-            retval, image = camera.read() # get an image
-            
-            if retval:
-                photo_path = "photos/photo.png"
-                cv2.imwrite(photo_path, image) # save an image in a file by path
-                self.new_photo_signal.emit(photo_path) # send a signal
-                
-            else:
-                print("Failed to take a photo")
-                break
-                
-            cv2.waitKey(5000) # wait before the next frame
-            
-        camera.release() # close a camera
+        self.camera = cv2.VideoCapture(0) # default camera   
+        self.take_photo() # first photo
+        
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.take_photo) # connect function with timer
+        self.timer.start(5000) # 5 seconds delay
         
     def stop(self):
-        self.running = False
+        if self.timer:
+            self.timer.stop()
+            self.timer.deleteLater()
+            self.timer = None
+        
+        if self.camera:
+            self.camera.release() # close a camera
+            self.camera = None
+        
+    def take_photo(self):
+        if not self.camera:
+            return
+        
+        retval, image = self.camera.read() # get an image
+            
+        if retval:
+            photo_path = "photos/photo.png"
+            cv2.imwrite(photo_path, image) # save an image in a file by path
+            self.new_photo_signal.emit(photo_path) # send a signal
+            
+        else:
+            print("Failed to take a photo")
+            self.stop()
 
 
 

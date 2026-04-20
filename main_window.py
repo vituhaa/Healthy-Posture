@@ -4,6 +4,7 @@ from widgets.photo_frame import PhotoFrame
 from take_photo import CameraManager
 
 class MainWindow(QMainWindow):
+    stop_requested = pyqtSignal() # signal for stop camera thread
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Healthy Posture")
@@ -21,15 +22,18 @@ class MainWindow(QMainWindow):
         self.camera_manager = CameraManager()
         self.camera_manager.moveToThread(self.camera_thread)
         
-        self.camera_thread.started.connect(self.camera_manager.start)
-        self.camera_manager.new_photo_signal.connect(self.__photo_frame.set_photo) # connect signal with slot
+        self.camera_thread.started.connect(self.camera_manager.start, Qt.ConnectionType.QueuedConnection)
         
-        self.camera_thread.finished.connect(self.camera_manager.stop)
+        self.stop_requested.connect(self.camera_manager.stop, Qt.ConnectionType.QueuedConnection)
+        
+        self.camera_manager.new_photo_signal.connect(self.__photo_frame.set_photo, Qt.ConnectionType.QueuedConnection)
+        
+        self.camera_thread.finished.connect(self.camera_manager.deleteLater)
         
         self.camera_thread.start()
         
     def closeEvent(self, event):
-        self.camera_manager.stop()
+        self.stop_requested.emit()
         self.camera_thread.quit()
         self.camera_thread.wait()
         event.accept()
