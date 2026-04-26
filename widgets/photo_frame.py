@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QLabel
+from PyQt6.QtWidgets import QLabel, QSizePolicy
 from PyQt6.QtGui import QPixmap
 
 from constants import GREEN_COLOR, RED_COLOR
@@ -7,15 +7,11 @@ from random import randint
 class PhotoFrame(QLabel):
     def __init__(self):
         super().__init__()
-        #self.__photoWindow = QLabel(self)
-        #self.__photoWindow.setScaledContents(True)
-        self.setScaledContents(True) # widget has photo size
-        #self.set_photo("photos/photo.png")
-        #self.set_border_color(RED_COLOR)
+        self.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        self.adjustSize() # widget has photo size
         
     def set_photo(self, photo_path):
         pixmap = QPixmap(photo_path)
-        #self.__photoWindow.setPixmap(pixmap)
         self.setPixmap(pixmap)
         
         # special logic for posture detection
@@ -26,5 +22,4 @@ class PhotoFrame(QLabel):
             self.set_border_color(RED_COLOR)
         
     def set_border_color(self, color):
-        #self.__photoWindow.setStyleSheet(f"border: 3px solid {color.};")
         self.setStyleSheet(f"border: 5px solid {color.name()};")
