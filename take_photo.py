@@ -1,4 +1,4 @@
-from PyQt6.QtCore import QObject, pyqtSignal, QTimer, Qt
+from PyQt6.QtCore import QObject, pyqtSignal, QTimer
 import cv2
 
 class CameraManager(QObject):

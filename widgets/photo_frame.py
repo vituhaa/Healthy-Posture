@@ -17,9 +17,9 @@ class PhotoFrame(QLabel):
         # special logic for posture detection
         random_number = randint(0, 1)
         if random_number:
-            self.set_border_color(GREEN_COLOR)
+            self.__set_border_color(GREEN_COLOR)
         else:
-            self.set_border_color(RED_COLOR)
+            self.__set_border_color(RED_COLOR)
         
-    def set_border_color(self, color):
+    def __set_border_color(self, color):
         self.setStyleSheet(f"border: 5px solid {color.name()};")

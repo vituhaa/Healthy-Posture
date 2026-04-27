@@ -1,34 +1,27 @@
-from PyQt6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QStackedWidget
-from PyQt6.QtCore import Qt, QObject, pyqtSignal, QThread
-from widgets.photo_frame import PhotoFrame
+from PyQt6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QStackedWidget
+from PyQt6.QtCore import Qt, pyqtSignal, QThread
+from widgets.photo_page import PhotoPage
 from widgets.main_menu import MainMenu
 from take_photo import CameraManager
+from constants import MAIN_WINDOW_SIZE, WHITE_COLOR
 
 class MainWindow(QMainWindow):
     stop_requested = pyqtSignal() # signal for stop camera thread
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Healthy Posture")
-        self.setMinimumSize(800, 600)
+        self.setMinimumSize(MAIN_WINDOW_SIZE)
+        self.setStyleSheet(f"background-color: {WHITE_COLOR.name()};")
         
         self.__main_menu = MainMenu()
-        self.__photo_frame = PhotoFrame()
-        
+        self.__photo_page = PhotoPage()
         self.__stacked_widget = QStackedWidget() # all tabs
         
-        # photo frame widget
-        photo_widget = QWidget()
-        photo_widget.setStyleSheet("background-color: white;")
-        photo_layout = QVBoxLayout(photo_widget)
-        photo_layout.setContentsMargins(10, 30, 10, 0)
-        photo_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.__insert_tabs()
+        self.__create_main_layout()
+        self.__create_camera_thread()
         
-        horizontal_container = QHBoxLayout()
-        horizontal_container.addStretch()
-        horizontal_container.addWidget(self.__photo_frame)
-        horizontal_container.addStretch()
-        photo_layout.addLayout(horizontal_container)
-        
+    def __insert_tabs(self):    
         # test tabs widgets
         prevention = QWidget()
         prevention.setStyleSheet("background-color: white;")
@@ -40,12 +33,13 @@ class MainWindow(QMainWindow):
         settings.setStyleSheet("background-color: white;")
         
         # all tabs insertion
-        self.__stacked_widget.addWidget(photo_widget)
+        self.__stacked_widget.addWidget(self.__photo_page)
         self.__stacked_widget.addWidget(prevention)
         self.__stacked_widget.addWidget(analytics)
         self.__stacked_widget.addWidget(about)
         self.__stacked_widget.addWidget(settings)
         
+    def __create_main_layout(self):
         central_widget = QWidget()
         layout = QHBoxLayout(central_widget)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -54,9 +48,10 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.__stacked_widget)
         self.setCentralWidget(central_widget)
         
-        self.__main_menu.tab_manager.currentRowChanged.connect(self.__stacked_widget.setCurrentIndex)
-        self.__main_menu.tab_manager.setCurrentRow(0)
+        self.__main_menu.connect_tab_changed(self.__stacked_widget.setCurrentIndex)
+        self.__main_menu.set_current_tab(0)
         
+    def __create_camera_thread(self):
         self.camera_thread = QThread()
         self.camera_manager = CameraManager()
         self.camera_manager.moveToThread(self.camera_thread)
@@ -65,7 +60,7 @@ class MainWindow(QMainWindow):
         
         self.stop_requested.connect(self.camera_manager.stop, Qt.ConnectionType.QueuedConnection)
         
-        self.camera_manager.new_photo_signal.connect(self.__photo_frame.set_photo, Qt.ConnectionType.QueuedConnection)
+        self.camera_manager.new_photo_signal.connect(self.__photo_page.set_photo, Qt.ConnectionType.QueuedConnection)
         
         self.camera_thread.finished.connect(self.camera_manager.deleteLater)
         
