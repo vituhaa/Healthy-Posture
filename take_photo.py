@@ -34,7 +34,7 @@ class CameraManager(QObject):
         retval, image = self.camera.read() # get an image
             
         if retval:
-            photo_path = "photos/photo.png"
+            photo_path = "photos/photo.jpg"
             cv2.imwrite(photo_path, image) # save an image in a file by path
             self.new_photo_signal.emit(photo_path) # send a signal
             
