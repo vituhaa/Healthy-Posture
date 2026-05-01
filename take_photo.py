@@ -8,6 +8,7 @@ class CameraManager(QObject):
         super().__init__()
         self.camera = None
         self.timer = None
+        self.__photo_counter = 0
         
     def start(self):
         self.camera = cv2.VideoCapture(0) # default camera   
@@ -34,7 +35,8 @@ class CameraManager(QObject):
         retval, image = self.camera.read() # get an image
             
         if retval:
-            photo_path = "photos/photo.jpg"
+            self.__photo_counter += 1
+            photo_path = f"photos/photo_{self.__photo_counter}.jpg"
             cv2.imwrite(photo_path, image) # save an image in a file by path
             self.new_photo_signal.emit(photo_path) # send a signal
             
