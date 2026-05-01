@@ -11,7 +11,11 @@ class CameraManager(QObject):
         self.__photo_counter = 0
         
     def start(self):
-        self.camera = cv2.VideoCapture(0) # default camera   
+        self.camera = cv2.VideoCapture(0) # default camera
+        # set camera resolution
+        self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+        self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 720) 
+        
         self.take_photo() # first photo
         
         self.timer = QTimer(self)
@@ -36,7 +40,7 @@ class CameraManager(QObject):
             
         if retval:
             self.__photo_counter += 1
-            photo_path = f"photos/photo_{self.__photo_counter}.jpg"
+            photo_path = f"photos/photo.jpg"
             cv2.imwrite(photo_path, image) # save an image in a file by path
             self.new_photo_signal.emit(photo_path) # send a signal
             
