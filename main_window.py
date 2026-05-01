@@ -3,6 +3,7 @@ from PyQt6.QtCore import Qt, pyqtSignal, QThread
 from widgets.photo_page import PhotoPage
 from widgets.main_menu import MainMenu
 from take_photo import CameraManager
+from movenet import Movenet
 from constants import MAIN_WINDOW_SIZE, WHITE_COLOR
 
 class MainWindow(QMainWindow):
@@ -19,7 +20,7 @@ class MainWindow(QMainWindow):
         
         self.__insert_tabs()
         self.__create_main_layout()
-        self.__create_camera_thread()
+        self.__create_threads()
         
     def __insert_tabs(self):    
         # test tabs widgets
@@ -51,7 +52,8 @@ class MainWindow(QMainWindow):
         self.__main_menu.connect_tab_changed(self.__stacked_widget.setCurrentIndex)
         self.__main_menu.set_current_tab(0)
         
-    def __create_camera_thread(self):
+    def __create_threads(self):
+        # init camera thread
         self.camera_thread = QThread()
         self.camera_manager = CameraManager()
         self.camera_manager.moveToThread(self.camera_thread)
@@ -64,10 +66,27 @@ class MainWindow(QMainWindow):
         
         self.camera_thread.finished.connect(self.camera_manager.deleteLater)
         
+        # init movenet thread
+        self.movenet_thread = QThread()
+        self.movenet = Movenet()
+        self.movenet.moveToThread(self.movenet_thread)
+        
+        self.movenet_thread.started.connect(self.movenet.start, Qt.ConnectionType.QueuedConnection)
+        
+        self.camera_manager.new_photo_signal.connect(self.movenet.get_model_result, Qt.ConnectionType.QueuedConnection)
+        
+        self.movenet.model_result_signal.connect(self.__photo_page.update_info, Qt.ConnectionType.QueuedConnection)
+        
+        self.movenet_thread.finished.connect(self.movenet.deleteLater)
+        
+        # run threads
         self.camera_thread.start()
+        self.movenet_thread.start()
         
     def closeEvent(self, event):
         self.stop_requested.emit()
         self.camera_thread.quit()
         self.camera_thread.wait()
+        self.movenet_thread.quit()
+        self.movenet_thread.wait()
         event.accept()

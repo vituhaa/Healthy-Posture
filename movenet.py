@@ -1,92 +1,119 @@
+from PyQt6.QtCore import QObject, pyqtSignal
 import tensorflow as tf
 import tensorflow_hub as tf_hub
 import joblib
 import numpy as np
 
-# модель movenet lightning
-model_lightning = tf_hub.load("https://tfhub.dev/google/movenet/singlepose/lightning/4")
-size_lightning = 192
+class Movenet(QObject):
+    model_result_signal = pyqtSignal(str, bool) # signal
+    
+    def __init__(self):
+        super().__init__()
+        
+        # movenet thunder
+        self.__model_thunder = None
+        self.__size_thunder = None
 
-mlp_lightning = joblib.load('model/mlp_lightning.joblib')
-mlp_scaler_lightning = joblib.load('model/scaler_lightning.joblib')
+        self.__mlp_thunder = None
+        self.__mlp_scaler_thunder = None
 
-# модель movenet thunder
-model_thunder = tf_hub.load("https://tfhub.dev/google/movenet/singlepose/thunder/4")
-size_thunder = 256
+        self.__categories = {'head_left': "Голова наклонена влево"
+                             , 'head_right': "Голова наклонена вправо"
+                             , 'correct': "Осанка ровная"
+                             , 'bend_over': "Осанка сутулая"
+                             , 'body_left': "Тело наклонено влево"
+                             , 'body_right': "Тело наклонено вправо"
+                             , 'tilt_back': "Тело отклонено назад"
+                             , 'too_close': "Близко к экрану"}
+        
+        self.__image_path = None
 
-mlp_thunder = joblib.load('model/mlp_thunder.joblib')
-mlp_scaler_thunder = joblib.load('model/scaler_thunder.joblib')
+    def start(self):
+        # movenet thunder
+        self.__model_thunder = tf_hub.load("https://tfhub.dev/google/movenet/singlepose/thunder/4")
+        self.__size_thunder = 256
 
-categories = ['head_left', 'head_right', 'correct', 'bend_over', 'body_left', 'body_right', 'tilt_back', 'too_close']
-
-def detection(image_path, model, input_size):
-  image = tf.io.read_file(image_path)
-  image = tf.image.decode_jpeg(image)
-  img = tf.expand_dims(image, axis=0)
-  resized_img = tf.image.resize_with_pad(img, input_size, input_size)
-  img_np = resized_img.numpy().astype(np.int32)
-  output = model.signatures["serving_default"](tf.constant(img_np))
-  keypoints = output['output_0'].numpy()
-  return keypoints
-
-
-def make_predictions(model, model_size, image_path): # подаю датасет, получаю точки от модели
-  pairs_xy = []
-  photo_keypoints = detection(image_path, model, model_size)
-  input_image = tf.io.read_file(image_path)
-  input_image = tf.image.decode_jpeg(input_image)
-  height, width, _ = input_image.shape
-  if (len(photo_keypoints.shape) == 4):
-    resized_x = photo_keypoints[0, 0, :, 1] * width
-    resized_y = photo_keypoints[0, 0, :, 0] * height
-  elif (len(photo_keypoints.shape) == 3):
-    print(photo_keypoints)
-    print(photo_keypoints[0, :, 0])
-    print(photo_keypoints[0, :, 1])
-    resized_x = photo_keypoints[0, :, 1] * width
-    resized_y = photo_keypoints[0, :, 0] * height
-  for i in range(0, 7):
-    pairs_xy.append((resized_x[i], resized_y[i]))
-  return (pairs_xy)
+        self.__mlp_thunder = joblib.load('model/mlp_thunder.joblib')
+        self.__mlp_scaler_thunder = joblib.load('model/scaler_thunder.joblib')
+        
+    def __detection(self, image_path, model, input_size):
+        if image_path:
+            image = tf.io.read_file(image_path)
+            image = tf.image.decode_jpeg(image)
+            img = tf.expand_dims(image, axis=0)
+            resized_img = tf.image.resize_with_pad(img, input_size, input_size)
+            img_np = resized_img.numpy().astype(np.int32)
+            output = model.signatures["serving_default"](tf.constant(img_np))
+            keypoints = output['output_0'].numpy()
+            return keypoints
+        return
 
 
-def check_mlp_on_test_ds(mlp, scaler):
-  # предсказания MoveNet на новых фотографиях, получение данных в нужном формате
-  path_example = r'photos/photo_8.jpg' # фото
-  arr_new_photos = []
-  photos_kpts = make_predictions(model_thunder, size_thunder, path_example)
-  arr_new_photos.append(photos_kpts)
+    def __make_predictions(self, model, model_size, image_path): # get model points
+        pairs_xy = []
+        if image_path:
+            photo_keypoints = self.__detection(image_path, model, model_size)
+            input_image = tf.io.read_file(image_path)
+            input_image = tf.image.decode_jpeg(input_image)
+            height, width, _ = input_image.shape
+            if (len(photo_keypoints.shape) == 4):
+                resized_x = photo_keypoints[0, 0, :, 1] * width
+                resized_y = photo_keypoints[0, 0, :, 0] * height
+            elif (len(photo_keypoints.shape) == 3):
+                print(photo_keypoints)
+                print(photo_keypoints[0, :, 0])
+                print(photo_keypoints[0, :, 1])
+                resized_x = photo_keypoints[0, :, 1] * width
+                resized_y = photo_keypoints[0, :, 0] * height
+            for i in range(0, 7):
+                pairs_xy.append((resized_x[i], resized_y[i]))
+            return (pairs_xy)
+        
+        return
 
-  # беру координаты для всех тестовых фотографий, урезаю до 7
-  X_test = []
-  for x in arr_new_photos:
-    arr_new = [tuple(float(a) for a in b) for b in x]
-    for i in range(0, len(arr_new), 7):
-      arr_seven = []
-      arr_seven = arr_new[i:i+7]
-      X_new = []
-      for x_coord, y_coord in arr_seven:
-        X_new.append(x_coord)
-        X_new.append(y_coord)
-      X_test.append(X_new)
 
-  # проверка предсказанной категории для каждой новой фотографии
-  y_pred_arr = []
-  for frame in X_test:
-    features = np.array(frame).reshape(1, -1)
-    X_new_scaled = scaler.transform(features)
-    pred_new = mlp.predict(X_new_scaled)
-    y_pred_arr.append(pred_new.item())
-    # prob_new = mlp.predict_proba(X_new_scaled)
+    def __check_mlp_on_test_ds(self, mlp, scaler):
+        # MoveNet predictions on new photos in necessary format
+        path_example = self.__image_path # photo
+        if path_example and self.__model_thunder and self.__size_thunder:
+            arr_new_photos = []
+            photos_kpts = self.__make_predictions(self.__model_thunder, self.__size_thunder, path_example)
+            arr_new_photos.append(photos_kpts)
 
-  return y_pred_arr
+            # cut test photo coordinates to 7
+            X_test = []
+            for x in arr_new_photos:
+                arr_new = [tuple(float(a) for a in b) for b in x]
+                for i in range(0, len(arr_new), 7):
+                    arr_seven = []
+                    arr_seven = arr_new[i:i+7]
+                    X_new = []
+                    for x_coord, y_coord in arr_seven:
+                        X_new.append(x_coord)
+                        X_new.append(y_coord)
+                    X_test.append(X_new)
 
-# pred_lightning = check_mlp_on_test_ds(mlp_lightning, mlp_scaler_lightning)
-# for i in range(len(categories)):
-#   if (pred_lightning[0] == i):
-#     print(f"Lightning model prediction: {categories[i]}")
+            # checking predicted category for a new photo
+            y_pred_arr = []
+            for frame in X_test:
+                features = np.array(frame).reshape(1, -1)
+                X_new_scaled = scaler.transform(features)
+                pred_new = mlp.predict(X_new_scaled)
+                y_pred_arr.append(pred_new.item())
+                # prob_new = mlp.predict_proba(X_new_scaled)
 
-pred_thunder = check_mlp_on_test_ds(mlp_thunder, mlp_scaler_thunder)
-for i in range(len(categories)):
-  if (pred_thunder[0] == i):
-    print(f"Thunder model prediction: {categories[i]}")
+            return y_pred_arr
+        
+        return
+
+    def get_model_result(self, photo_path): # slot for photo
+        is_correct_pose = False
+        self.__image_path = photo_path
+        if self.__mlp_thunder and self.__mlp_scaler_thunder:
+            pred_thunder = self.__check_mlp_on_test_ds(self.__mlp_thunder, self.__mlp_scaler_thunder)
+            for i, (key, value) in enumerate(self.__categories.items()):
+                if (pred_thunder[0] == i):
+                    #print(f"Thunder model prediction: {key}")
+                    if (key == "correct"):
+                        is_correct_pose = True
+                    self.model_result_signal.emit(value, is_correct_pose) # send a signal

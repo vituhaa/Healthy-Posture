@@ -1,13 +1,13 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel
 from PyQt6.QtCore import Qt
 from widgets.photo_frame import PhotoFrame
-from constants import MAX_PADDING, MIN_PADDING
+from constants import MAX_PADDING, MIN_PADDING, GREEN_COLOR, RED_COLOR, WHITE_COLOR, FONT
 
 class PhotoPage(QWidget):
     def __init__(self):
         super().__init__()
         self.__photo_frame = PhotoFrame()
-        self.__wait_photo_label = QLabel("Настройкка камеры. Пожалуйста, подождите...")
+        self.__info = QLabel()
         self.__layout = None
         self.__create_main_layout()
     
@@ -17,6 +17,7 @@ class PhotoPage(QWidget):
         self.__layout.setSpacing(MAX_PADDING)
         self.__layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.__layout.addWidget(self.__wait_photo_label, 0, Qt.AlignmentFlag.AlignHCenter)
+        self.__layout.addWidget(self.__info, 0, Qt.AlignmentFlag.AlignHCenter)
         self.setLayout(self.__layout)
         
     def set_photo(self, photo_path):
@@ -27,4 +28,15 @@ class PhotoPage(QWidget):
                 self.__wait_photo_label = None
 
         self.__photo_frame.set_photo(photo_path)
+        self.__clear_info()
         
+    def update_info(self, answer, is_correct_pose): # slot for model answer
+        if is_correct_pose:
+            self.__photo_frame.set_border_color(GREEN_COLOR)
+        else:
+            self.__photo_frame.set_border_color(RED_COLOR)
+        self.__info.setText(answer)
+        
+    def __clear_info(self):
+        self.__photo_frame.set_border_color(WHITE_COLOR)
+        self.__info.setText("")
