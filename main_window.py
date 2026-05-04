@@ -2,6 +2,7 @@ from PyQt6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QStackedWidget
 from PyQt6.QtCore import Qt, pyqtSignal, QThread
 from widgets.photo_page import PhotoPage
 from widgets.main_menu import MainMenu
+from widgets.notification import Notification
 from take_photo import CameraManager
 from movenet import Movenet
 from constants import MAIN_WINDOW_SIZE, WHITE_COLOR
@@ -17,6 +18,7 @@ class MainWindow(QMainWindow):
         self.__main_menu = MainMenu()
         self.__photo_page = PhotoPage()
         self.__stacked_widget = QStackedWidget() # all tabs
+        self.__posture_notification = Notification()
         
         self.__insert_tabs()
         self.__create_main_layout()
@@ -52,6 +54,8 @@ class MainWindow(QMainWindow):
         self.__main_menu.connect_tab_changed(self.__stacked_widget.setCurrentIndex)
         self.__main_menu.set_current_tab(0)
         
+        self.__posture_notification.clicked.connect(lambda: self.__go_to_page(0))
+        
     def __create_threads(self):
         # init camera thread
         self.camera_thread = QThread()
@@ -76,6 +80,7 @@ class MainWindow(QMainWindow):
         self.camera_manager.new_photo_signal.connect(self.movenet.get_model_result, Qt.ConnectionType.QueuedConnection)
         
         self.movenet.model_result_signal.connect(self.__photo_page.update_info, Qt.ConnectionType.QueuedConnection)
+        self.movenet.model_result_signal.connect(self.__show_posture_notification, Qt.ConnectionType.QueuedConnection)
         
         self.movenet_thread.finished.connect(self.movenet.deleteLater)
         
@@ -90,3 +95,14 @@ class MainWindow(QMainWindow):
         self.movenet_thread.quit()
         self.movenet_thread.wait()
         event.accept()
+        
+    def __show_posture_notification(self, answer, is_correct_pose):
+        if not is_correct_pose:
+            self.__posture_notification.set_title("Нарушение осанки")
+            self.__posture_notification.set_text(answer)
+            self.__posture_notification.show_notification()
+            
+    def __go_to_page(self, index):
+        self.__main_menu.set_current_tab(index)
+        self.showNormal() # show widget if it was minimized
+        self.raise_()
