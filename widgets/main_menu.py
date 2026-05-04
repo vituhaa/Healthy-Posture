@@ -7,7 +7,7 @@ class MainMenu(QWidget):
         super().__init__()
         self.setMaximumWidth(MENU_WIDTH)
         
-        self.__text_font = FONT
+        self.__text_font = QFont(FONT)
         self.__tab_manager = QListWidget(self)
         self.__init_tabs()
         self.__create_main_layout()

@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QGridLayout, QToolButton
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
-from PyQt6.QtGui import QIcon
+from PyQt6.QtGui import QIcon, QFont
 
 from constants import FONT, MIN_PADDING, MAX_PADDING
 
@@ -29,7 +29,7 @@ class Notification(QWidget):
         icon_label.setPixmap(self.__icon.pixmap(16, 16))
         icon_label.adjustSize()
         
-        font = FONT
+        font = QFont(FONT)
         font.setPointSize(8)
         self.__app_name.setFont(font)
         font.setPointSize(9)

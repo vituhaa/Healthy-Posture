@@ -9,7 +9,7 @@ class PhotoPage(QWidget):
         super().__init__()
         self.__photo_frame = PhotoFrame()
         self.__wait_photo_label = QLabel("Настройка камеры. Пожалуйста, подождите...")
-        self.__text_font = FONT
+        self.__text_font = QFont(FONT)
         self.__info = QLabel()
         self.__layout = None
         self.__create_main_layout()
