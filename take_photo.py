@@ -16,8 +16,6 @@ class CameraManager(QObject):
         self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
         self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 720) 
         
-        self.take_photo() # first photo
-        
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.take_photo) # connect function with timer
         self.timer.start(5000) # 5 seconds delay

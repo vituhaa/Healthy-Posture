@@ -64,7 +64,7 @@ class MainWindow(QMainWindow):
         
         self.camera_thread.started.connect(self.camera_manager.start, Qt.ConnectionType.QueuedConnection)
         
-        self.stop_requested.connect(self.camera_manager.stop, Qt.ConnectionType.QueuedConnection)
+        self.stop_requested.connect(self.camera_manager.stop, Qt.ConnectionType.BlockingQueuedConnection)
         
         self.camera_manager.new_photo_signal.connect(self.__photo_page.set_photo, Qt.ConnectionType.QueuedConnection)
         
@@ -94,10 +94,14 @@ class MainWindow(QMainWindow):
         self.camera_thread.wait()
         self.movenet_thread.quit()
         self.movenet_thread.wait()
+        # remove notification window
+        self.__posture_notification.close()
+        self.__posture_notification.deleteLater()
+        self.__posture_notification = None
         event.accept()
         
     def __show_posture_notification(self, answer, is_correct_pose):
-        if not is_correct_pose:
+        if not is_correct_pose and self.__posture_notification:
             self.__posture_notification.set_title("Нарушение осанки")
             self.__posture_notification.set_text(answer)
             self.__posture_notification.show_notification()
