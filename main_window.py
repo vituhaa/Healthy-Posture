@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QStackedWidget
-from PyQt6.QtCore import Qt, pyqtSignal, QThread
+from PyQt6.QtCore import Qt, pyqtSignal, QThread, QTimer
 from widgets.photo_page import PhotoPage
 from widgets.main_menu import MainMenu
 from widgets.notification import Notification
@@ -19,10 +19,13 @@ class MainWindow(QMainWindow):
         self.__photo_page = PhotoPage()
         self.__stacked_widget = QStackedWidget() # all tabs
         self.__posture_notification = Notification()
+        self.__preventive_notification = Notification()
+        self.__preventive_notification_timer = QTimer(self)
         
         self.__insert_tabs()
         self.__create_main_layout()
         self.__create_threads()
+        self.__init_preventive_notification_timer()
         
     def __insert_tabs(self):    
         # test tabs widgets
@@ -88,16 +91,26 @@ class MainWindow(QMainWindow):
         self.camera_thread.start()
         self.movenet_thread.start()
         
+    def __init_preventive_notification_timer(self):
+        self.__preventive_notification_timer.timeout.connect(self.__show_preventive_notification)
+        self.__preventive_notification_timer.start(60000) # 60 sec
+        
     def closeEvent(self, event):
+        self.__preventive_notification_timer.stop()
         self.stop_requested.emit()
         self.camera_thread.quit()
         self.camera_thread.wait()
         self.movenet_thread.quit()
         self.movenet_thread.wait()
-        # remove notification window
+        
+        # remove notification windows
         self.__posture_notification.close()
         self.__posture_notification.deleteLater()
         self.__posture_notification = None
+        
+        self.__preventive_notification.close()
+        self.__preventive_notification.deleteLater()
+        self.__preventive_notification = None
         event.accept()
         
     def __show_posture_notification(self, answer, is_correct_pose):
@@ -105,6 +118,12 @@ class MainWindow(QMainWindow):
             self.__posture_notification.set_title("Нарушение осанки")
             self.__posture_notification.set_text(answer)
             self.__posture_notification.show_notification()
+            
+    def __show_preventive_notification(self):
+        if self.__preventive_notification:
+            self.__preventive_notification.set_title("Напоминание")
+            self.__preventive_notification.set_text("Пора отдохнуть")
+            self.__preventive_notification.show_notification()
             
     def __go_to_page(self, index):
         self.__main_menu.set_current_tab(index)
