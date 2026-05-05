@@ -23,6 +23,7 @@ class Notification(QWidget):
         self.__close_button = QToolButton()
         
         self.__create_main_layout()
+        self.adjustSize()
         
     def __create_main_layout(self):
         icon_label = QLabel()
@@ -62,12 +63,6 @@ class Notification(QWidget):
          
     def show_notification(self):
         if self.__title and self.__text:
-            self.adjustSize()
-            screen = QApplication.primaryScreen()
-            screen_geometry = screen.availableGeometry() # window geometry without tasks panel
-            x = screen_geometry.right() - self.width() - MIN_PADDING
-            y = screen_geometry.bottom() - self.height() - MAX_PADDING
-            self.setGeometry(x, y, self.width(), self.height())
             self.show()
             QTimer.singleShot(self.__time, self.hide)
             

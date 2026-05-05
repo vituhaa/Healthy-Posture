@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QStackedWidget
 from PyQt6.QtCore import Qt, pyqtSignal, QThread, QTimer
 from widgets.photo_page import PhotoPage
 from widgets.main_menu import MainMenu
-from widgets.notification import Notification
+from notification_manager import NotificationManager
 from take_photo import CameraManager
 from movenet import Movenet
 from constants import MAIN_WINDOW_SIZE, WHITE_COLOR
@@ -18,14 +18,13 @@ class MainWindow(QMainWindow):
         self.__main_menu = MainMenu()
         self.__photo_page = PhotoPage()
         self.__stacked_widget = QStackedWidget() # all tabs
-        self.__posture_notification = Notification()
-        self.__preventive_notification = Notification()
+        self.__notification_manager = NotificationManager()
         self.__preventive_notification_timer = QTimer(self)
         
         self.__insert_tabs()
         self.__create_main_layout()
         self.__create_threads()
-        self.__init_preventive_notification_timer()
+        self.__add_notifications()
         
     def __insert_tabs(self):    
         # test tabs widgets
@@ -57,8 +56,6 @@ class MainWindow(QMainWindow):
         self.__main_menu.connect_tab_changed(self.__stacked_widget.setCurrentIndex)
         self.__main_menu.set_current_tab(0)
         
-        self.__posture_notification.clicked.connect(lambda: self.__go_to_page(0))
-        
     def __create_threads(self):
         # init camera thread
         self.camera_thread = QThread()
@@ -83,17 +80,28 @@ class MainWindow(QMainWindow):
         self.camera_manager.new_photo_signal.connect(self.movenet.get_model_result, Qt.ConnectionType.QueuedConnection)
         
         self.movenet.model_result_signal.connect(self.__photo_page.update_info, Qt.ConnectionType.QueuedConnection)
-        self.movenet.model_result_signal.connect(self.__show_posture_notification, Qt.ConnectionType.QueuedConnection)
+        self.movenet.model_result_signal.connect(
+            lambda answer, is_correct_pose: (
+                self.__show_notification("Нарушение осанки", answer)
+                if not is_correct_pose
+                else None
+            ), Qt.ConnectionType.QueuedConnection)
         
         self.movenet_thread.finished.connect(self.movenet.deleteLater)
         
         # run threads
         self.camera_thread.start()
         self.movenet_thread.start()
-        
+    
+    def __add_notifications(self):
+        self.__notification_manager.add_notification_category("Нарушение осанки")
+        self.__notification_manager.add_notification_category("Напоминание")
+        self.__notification_manager.notification_clicked.connect(lambda: self.__go_to_page(0))
+        self.__init_preventive_notification_timer()
+            
     def __init_preventive_notification_timer(self):
-        self.__preventive_notification_timer.timeout.connect(self.__show_preventive_notification)
-        self.__preventive_notification_timer.start(60000) # 60 sec
+        self.__preventive_notification_timer.timeout.connect(lambda: self.__show_notification("Напоминание", "Пора отдохнуть"))
+        self.__preventive_notification_timer.start(10000) # 60 sec
         
     def closeEvent(self, event):
         self.__preventive_notification_timer.stop()
@@ -104,26 +112,13 @@ class MainWindow(QMainWindow):
         self.movenet_thread.wait()
         
         # remove notification windows
-        self.__posture_notification.close()
-        self.__posture_notification.deleteLater()
-        self.__posture_notification = None
-        
-        self.__preventive_notification.close()
-        self.__preventive_notification.deleteLater()
-        self.__preventive_notification = None
+        self.__notification_manager.close_all_notifications()
+        self.__notification_manager = None
         event.accept()
-        
-    def __show_posture_notification(self, answer, is_correct_pose):
-        if not is_correct_pose and self.__posture_notification:
-            self.__posture_notification.set_title("Нарушение осанки")
-            self.__posture_notification.set_text(answer)
-            self.__posture_notification.show_notification()
-            
-    def __show_preventive_notification(self):
-        if self.__preventive_notification:
-            self.__preventive_notification.set_title("Напоминание")
-            self.__preventive_notification.set_text("Пора отдохнуть")
-            self.__preventive_notification.show_notification()
+    
+    def __show_notification(self, category, text):
+        if self.__notification_manager:
+            self.__notification_manager.show_notification(category, text)
             
     def __go_to_page(self, index):
         self.__main_menu.set_current_tab(index)
