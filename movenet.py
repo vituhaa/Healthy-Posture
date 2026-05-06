@@ -30,7 +30,8 @@ class Movenet(QObject):
 
     def start(self):
         # movenet thunder
-        self.__model_thunder = tf_hub.load("https://tfhub.dev/google/movenet/singlepose/thunder/4")
+        #self.__model_thunder = tf_hub.load("https://tfhub.dev/google/movenet/singlepose/thunder/4")
+        self.__model_thunder = tf_hub.load('model/movenet_model')
         self.__size_thunder = 256
 
         self.__mlp_thunder = joblib.load('model/mlp_thunder.joblib')
