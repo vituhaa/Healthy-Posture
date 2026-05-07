@@ -13,7 +13,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Healthy Posture")
         self.setMinimumSize(MAIN_WINDOW_SIZE)
-        self.setStyleSheet(f"background-color: {WHITE_COLOR.name()};")
+        self.setStyleSheet(f"QMainWindow {{ background-color: {WHITE_COLOR.name()} }};")
         
         self.__main_menu = MainMenu()
         self.__photo_page = PhotoPage()
