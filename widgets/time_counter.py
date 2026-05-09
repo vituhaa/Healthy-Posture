@@ -1,7 +1,9 @@
 from PyQt6.QtWidgets import QWidget, QSpinBox, QLabel, QHBoxLayout
+from PyQt6.QtCore import pyqtSignal
 from datetime import datetime, timedelta
 
 class TimeCounter(QWidget):
+    time_changed = pyqtSignal(int)
     def __init__(self, hours_need, minutes_need, seconds_need):
         super().__init__()
         self.__hours = None
@@ -56,6 +58,7 @@ class TimeCounter(QWidget):
     def set_value(self, time_str): # h:m:s
         if self.__is_correct_time(time_str):
             time = datetime.strptime(time_str, '%H:%M:%S')
+            actual_time = self.__time_to_seconds(time)
             if self.__is_time_in_interval(time):
                 if self.__hours:
                     self.__hours.setValue(time.hour)
@@ -63,6 +66,7 @@ class TimeCounter(QWidget):
                     self.__minutes.setValue(time.minute)
                 if self.__seconds:
                     self.__seconds.setValue(time.second)
+                self.time_changed.emit(actual_time)
                
     def __is_correct_time(self, time_str):
         try:
@@ -95,6 +99,7 @@ class TimeCounter(QWidget):
             time_str += '0'
         
         time = datetime.strptime(time_str, '%H:%M:%S')
+        actual_time = self.__time_to_seconds(time)
         
         if not self.__is_time_in_interval(time):
             time_seconds = self.__time_to_seconds(time) 
@@ -111,6 +116,7 @@ class TimeCounter(QWidget):
                     self.__seconds.blockSignals(True)
                     self.__seconds.setValue(self.__min_time.second)
                     self.__seconds.blockSignals(False)
+                actual_time = self.__min_time_s
             else:
                 if self.__hours:
                     self.__hours.blockSignals(True)
@@ -124,9 +130,33 @@ class TimeCounter(QWidget):
                     self.__seconds.blockSignals(True)
                     self.__seconds.setValue(self.__max_time.second)
                     self.__seconds.blockSignals(False)
+                actual_time = self.__max_time_s
+        
+        self.time_changed.emit(actual_time)    
         
     def __time_to_seconds(self, time):
         return time.hour * 3600 + time.minute * 60 + time.second
-                
+    
+    def get_total_seconds(self):
+        time_str = ""
+        if self.__hours:
+            time_str += f'{self.__hours.value()}:'
+        else:
+            time_str += '0:'
+        if self.__minutes:
+            time_str += f'{self.__minutes.value()}:'
+        else:
+            time_str += '0:'
+        if self.__seconds:
+            time_str += f'{self.__seconds.value()}'
+        else:
+            time_str += '0'
+        
+        time = datetime.strptime(time_str, '%H:%M:%S')
+        return self.__time_to_seconds(time)
+    
+    def set_total_seconds_value(self, seconds):
+        time_str = str(timedelta(seconds=seconds))
+        self.set_value(time_str)
         
         
