@@ -27,6 +27,8 @@ class MainWindow(QMainWindow):
         self.__create_main_layout()
         self.__create_threads()
         self.__add_notifications()
+        self.__connect_settings_signals()
+        self.__settings_page.set_start_settings()
         
     def __insert_tabs(self):    
         # test tabs widgets
@@ -101,7 +103,14 @@ class MainWindow(QMainWindow):
             
     def __init_preventive_notification_timer(self):
         self.__preventive_notification_timer.timeout.connect(lambda: self.__show_notification("Напоминание", "Пора отдохнуть"))
-        self.__preventive_notification_timer.start(10000) # 60 sec
+    def __connect_settings_signals(self):
+        if self.__settings_page:
+            if self.__notification_manager:
+                self.__settings_page.posture_music_set.connect(lambda music_file:
+                    self.__notification_manager.set_music_notification_category("Нарушение осанки", music_file))
+                
+                self.__settings_page.preventive_music_set.connect(lambda music_file:
+                    self.__notification_manager.set_music_notification_category("Напоминание", music_file))
         
     def closeEvent(self, event):
         self.__preventive_notification_timer.stop()

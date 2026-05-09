@@ -8,7 +8,8 @@ from widgets.music_group import MusicGroup
 
 class SettingsPage(QWidget):
     analysis_frequency_set = pyqtSignal(int)
-    preventive_frequency_set = pyqtSignal(int)
+    posture_music_set = pyqtSignal(str)
+    preventive_music_set = pyqtSignal(str)
     def __init__(self):
         super().__init__()
         self.__posture_analysis_frequency = None
@@ -200,9 +201,13 @@ class SettingsPage(QWidget):
         posture_track = self.__settings["posture_music"]
         if self.__posture_music_widget.get_current_track() != posture_track:
             self.__posture_music_widget.set_track(posture_track)
+            self.posture_music_set.emit(posture_track)
+            
         preventive_track = self.__settings["preventive_music"]
         if self.__preventive_music_widget.get_current_track() != preventive_track:
             self.__preventive_music_widget.set_track(preventive_track)
+            self.preventive_music_set.emit(preventive_track)
+            
         self.__cancel_button.setEnabled(False)
         self.__apply_button.setEnabled(False)
         
@@ -218,11 +223,16 @@ class SettingsPage(QWidget):
         posture_track_new = self.__posture_music_widget.get_current_track()
         if posture_track_new != self.__settings["posture_music"]:
             self.__settings["posture_music"] = posture_track_new
+            self.posture_music_set.emit(posture_track_new)
+            
         preventive_track_new = self.__preventive_music_widget.get_current_track()
         if preventive_track_new != self.__settings["preventive_music"]:
             self.__settings["preventive_music"] = preventive_track_new
+            self.preventive_music_set.emit(preventive_track_new)
+            
         self.__cancel_button.setEnabled(False)
         self.__apply_button.setEnabled(False)
         
-        
-        
+    def set_start_settings(self):
+        self.posture_music_set.emit(self.__settings["posture_music"])
+        self.preventive_music_set.emit(self.__settings["preventive_music"])
