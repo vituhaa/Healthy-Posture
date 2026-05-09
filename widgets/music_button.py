@@ -1,8 +1,9 @@
 from PyQt6.QtWidgets import QRadioButton
 from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
-from PyQt6.QtCore import QUrl, QFile
+from PyQt6.QtCore import QUrl, QFile, pyqtSignal
 
 class MusicButton(QRadioButton):
+    music_checked = pyqtSignal(str)
     def __init__(self, path_to_music_file):
         super().__init__()
         
@@ -16,6 +17,7 @@ class MusicButton(QRadioButton):
             self.__music.setSource(QUrl.fromLocalFile(path_to_music_file))
             self.clicked.connect(lambda: (self.__music.play(),
                                         self.setChecked(True)))
+            self.toggled.connect(lambda checked: self.music_checked.emit(path_to_music_file))
         
     def __get_file_name(self, file):
         start_index = 0
@@ -25,4 +27,10 @@ class MusicButton(QRadioButton):
             start_index = file.rfind('\\') + 1
         end_index = file.rfind('.')
         return file[start_index:end_index]
+    
+    def get_music(self):
+        if self.__file.exists():
+            return self.__file.fileName()
+        else:
+            return
         
