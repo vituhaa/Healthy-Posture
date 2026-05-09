@@ -41,3 +41,8 @@ class NotificationManager(QObject):
         for notification in self.__notification_categories.values():
             notification.close()
             notification.deleteLater()
+            
+    def set_music_notification_category(self, category_name, music_file):
+        if category_name in self.__notification_categories:
+            notification = self.__notification_categories[category_name]
+            notification.set_music(music_file)

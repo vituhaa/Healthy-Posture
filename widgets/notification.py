@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QGridLayout, QToolButton
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QFile, QUrl
 from PyQt6.QtGui import QIcon, QFont
+from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 
 from constants import FONT, MIN_PADDING, MAX_PADDING
 
@@ -21,6 +22,11 @@ class Notification(QWidget):
         self.__text = QLabel(text)
         self.__time = 3000 # 3 seconds showing
         self.__close_button = QToolButton()
+        self.__music_player = QMediaPlayer()
+        self.__audio_output = QAudioOutput()
+        self.__audio_output.setVolume(1)
+        self.__music_player.setAudioOutput(self.__audio_output)
+        self.__is_sound_on = True
         
         self.__create_main_layout()
         self.adjustSize()
@@ -64,6 +70,8 @@ class Notification(QWidget):
     def show_notification(self):
         if self.__title and self.__text:
             self.show()
+            if self.__is_sound_on:
+                self.__music_player.play()
             QTimer.singleShot(self.__time, self.hide)
             
     def mousePressEvent(self, event):
@@ -71,3 +79,8 @@ class Notification(QWidget):
             self.clicked.emit() # send click signal
             self.hide()
         super().mousePressEvent(event)
+        
+    def set_music(self, music_file):
+        file = QFile(music_file)
+        if file.exists():
+            self.__music_player.setSource(QUrl.fromLocalFile(music_file))
