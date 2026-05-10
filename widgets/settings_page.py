@@ -7,7 +7,7 @@ from widgets.music_button import MusicButton
 from widgets.music_group import MusicGroup
 
 class SettingsPage(QWidget):
-    analysis_frequency_set = pyqtSignal(int)
+    analysis_frequency_set = pyqtSignal(int) # in milliseconds
     preventive_frequency_set = pyqtSignal(int) # in milliseconds
     posture_music_set = pyqtSignal(str)
     preventive_music_set = pyqtSignal(str)
@@ -195,6 +195,7 @@ class SettingsPage(QWidget):
         posture_total_seconds = self.__settings["posture_analysis_frequency"]
         if self.__posture_analysis_frequency.get_total_seconds() != posture_total_seconds:
             self.__posture_analysis_frequency.set_total_seconds_value(posture_total_seconds)
+            self.analysis_frequency_set.emit(posture_total_seconds * 1000) # in milliseconds
             
         preventive_total_seconds = self.__settings["preventive_notification_frequency"]
         if self.__preventive_notification_frequency.get_total_seconds() != preventive_total_seconds:
@@ -219,6 +220,7 @@ class SettingsPage(QWidget):
         posture_analysis_new = self.__posture_analysis_frequency.get_total_seconds()
         if posture_analysis_new != self.__settings["posture_analysis_frequency"]:
             self.__settings["posture_analysis_frequency"] = posture_analysis_new
+            self.analysis_frequency_set.emit(posture_analysis_new * 1000) # in milliseconds
             
         preventive_frequency_new = self.__preventive_notification_frequency.get_total_seconds()
         if  preventive_frequency_new != self.__settings["preventive_notification_frequency"]:
@@ -239,6 +241,7 @@ class SettingsPage(QWidget):
         self.__apply_button.setEnabled(False)
         
     def set_start_settings(self):
+        self.analysis_frequency_set.emit(self.__settings["posture_analysis_frequency"] * 1000) # in milliseconds
         self.preventive_frequency_set.emit(self.__settings["preventive_notification_frequency"] * 1000) # in milliseconds
         self.posture_music_set.emit(self.__settings["posture_music"])
         self.preventive_music_set.emit(self.__settings["preventive_music"])

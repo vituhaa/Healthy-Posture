@@ -107,6 +107,8 @@ class MainWindow(QMainWindow):
         
     def __connect_settings_signals(self):
         if self.__settings_page:
+            if self.camera_manager:
+                self.__settings_page.analysis_frequency_set.connect(self.camera_manager.change_photo_inteval)
             if self.__notification_manager:
                 self.__settings_page.posture_music_set.connect(lambda music_file:
                     self.__notification_manager.set_music_notification_category("Нарушение осанки", music_file))

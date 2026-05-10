@@ -45,6 +45,11 @@ class CameraManager(QObject):
         else:
             print("Failed to take a photo")
             self.stop()
+            
+    def change_photo_inteval(self, interval):
+        if self.timer and self.timer.isActive():
+            self.timer.stop()
+            self.timer.start(interval)
 
 
 
