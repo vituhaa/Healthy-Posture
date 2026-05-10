@@ -44,3 +44,12 @@ class SwitchButton(QWidget):
                                        f"QPushButton::hover {{ background-color: {self.__darker_white.name()}; color: black; }}"
                                         f"QPushButton::pressed {{ background-color: {WHITE_COLOR.name()}; color: {self.__lighter_black.name()} }}")
         self.switch_button_on.emit(False)
+    
+    def get_state(self):
+        return not self.__on_button.isEnabled()
+       
+    def set_state(self, is_on):
+        if is_on:
+            self.__push_on()
+        else:
+            self.__push_off()
