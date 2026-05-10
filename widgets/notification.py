@@ -27,6 +27,7 @@ class Notification(QWidget):
         self.__audio_output.setVolume(1)
         self.__music_player.setAudioOutput(self.__audio_output)
         self.__is_sound_on = True
+        self.__is_on = True
         
         self.__create_main_layout()
         self.adjustSize()
@@ -68,7 +69,7 @@ class Notification(QWidget):
         self.__text.setText(text)
          
     def show_notification(self):
-        if self.__title and self.__text:
+        if self.__title and self.__text and self.__is_on:
             self.show()
             if self.__is_sound_on:
                 self.__music_player.play()
@@ -84,3 +85,9 @@ class Notification(QWidget):
         file = QFile(music_file)
         if file.exists():
             self.__music_player.setSource(QUrl.fromLocalFile(music_file))
+            
+    def set_on_off_music_state(self, state):
+        self.__is_sound_on = state
+        
+    def set_on_off_state(self, state):
+        self.__is_on = state

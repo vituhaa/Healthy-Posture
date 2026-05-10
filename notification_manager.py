@@ -46,3 +46,13 @@ class NotificationManager(QObject):
         if category_name in self.__notification_categories:
             notification = self.__notification_categories[category_name]
             notification.set_music(music_file)
+            
+    def set_on_off_music_notification_category(self, category_name, state):
+        if category_name in self.__notification_categories:
+            notification = self.__notification_categories[category_name]
+            notification.set_on_off_music_state(state)
+            
+    def set_on_off_notification_category(self, category_name, state):
+        if category_name in self.__notification_categories:
+            notification = self.__notification_categories[category_name]
+            notification.set_on_off_state(state)
