@@ -12,6 +12,10 @@ class SettingsPage(QWidget):
     preventive_frequency_set = pyqtSignal(int) # in milliseconds
     posture_music_set = pyqtSignal(str)
     preventive_music_set = pyqtSignal(str)
+    posture_notifications_on = pyqtSignal(bool)
+    preventive_notifications_on = pyqtSignal(bool)
+    posture_music_on = pyqtSignal(bool)
+    preventive_music_on = pyqtSignal(bool)
     def __init__(self):
         super().__init__()
         self.__posture_analysis_frequency = None
@@ -253,10 +257,12 @@ class SettingsPage(QWidget):
         is_posture_notifications_on = self.__settings["is_posture_notifications_on"]
         if self.__posture_notification_switch.get_state() != is_posture_notifications_on:
             self.__posture_notification_switch.set_state(is_posture_notifications_on)
+            self.posture_notifications_on.emit(is_posture_notifications_on)
             
         is_preventive_notifications_on = self.__settings["is_preventive_notifications_on"]
         if self.__preventive_notification_switch.get_state() != is_preventive_notifications_on:
             self.__preventive_notification_switch.set_state(is_preventive_notifications_on)
+            self.preventive_notifications_on.emit(is_preventive_notifications_on)
             
         preventive_total_seconds = self.__settings["preventive_notification_frequency"]
         if self.__preventive_notification_frequency.get_total_seconds() != preventive_total_seconds:
@@ -266,10 +272,12 @@ class SettingsPage(QWidget):
         is_posture_music_on = self.__settings["is_posture_music_on"]
         if self.__posture_music_switch.get_state() != is_posture_music_on:
             self.__posture_music_switch.set_state(is_posture_music_on)
+            self.posture_music_on.emit(is_posture_music_on)
             
         is_preventive_music_on = self.__settings["is_preventive_music_on"]
         if self.__preventive_music_switch.get_state() != is_preventive_music_on:
             self.__preventive_music_switch.set_state(is_preventive_music_on)
+            self.preventive_music_on.emit(is_preventive_music_on)
             
         posture_track = self.__settings["posture_music"]
         if self.__posture_music_widget.get_current_track() != posture_track:
@@ -293,11 +301,13 @@ class SettingsPage(QWidget):
         
         is_posture_notifications_on = self.__posture_notification_switch.get_state()
         if is_posture_notifications_on != self.__settings["is_posture_notifications_on"]:
-            self.__posture_notification_switch.set_state(is_posture_notifications_on)
+            self.__settings["is_posture_notifications_on"] = is_posture_notifications_on
+            self.posture_notifications_on.emit(is_posture_notifications_on)
             
         is_preventive_notifications_on = self.__preventive_notification_switch.get_state()
         if is_preventive_notifications_on != self.__settings["is_preventive_notifications_on"]:
-            self.__preventive_notification_switch.set_state(is_preventive_notifications_on)
+            self.__settings["is_preventive_notifications_on"] = is_preventive_notifications_on
+            self.preventive_notifications_on.emit(is_preventive_notifications_on)
                 
         preventive_frequency_new = self.__preventive_notification_frequency.get_total_seconds()
         if  preventive_frequency_new != self.__settings["preventive_notification_frequency"]:
@@ -306,11 +316,13 @@ class SettingsPage(QWidget):
         
         is_posture_music_on = self.__posture_music_switch.get_state()
         if is_posture_music_on != self.__settings["is_posture_music_on"]:
-            self.__posture_music_switch.set_state(is_posture_music_on)
+            self.__settings["is_posture_music_on"] = is_posture_music_on
+            self.posture_music_on.emit(is_posture_music_on)
             
         is_preventive_music_on = self.__preventive_music_switch.get_state()
         if is_preventive_music_on != self.__settings["is_preventive_music_on"]:
-            self.__preventive_music_switch.set_state(is_preventive_music_on)
+            self.__settings["is_preventive_music_on"] = is_preventive_music_on
+            self.preventive_music_on.emit(is_preventive_music_on)
             
         posture_track_new = self.__posture_music_widget.get_current_track()
         if posture_track_new != self.__settings["posture_music"]:
@@ -327,7 +339,11 @@ class SettingsPage(QWidget):
         
     def set_start_settings(self):
         self.analysis_frequency_set.emit(self.__settings["posture_analysis_frequency"] * 1000) # in milliseconds
+        self.posture_notifications_on.emit(self.__settings["is_posture_notifications_on"])
+        self.preventive_notifications_on.emit(self.__settings["is_preventive_notifications_on"])
         self.preventive_frequency_set.emit(self.__settings["preventive_notification_frequency"] * 1000) # in milliseconds
+        self.posture_music_on.emit(self.__settings["is_posture_music_on"])
+        self.preventive_music_on.emit(self.__settings["is_preventive_music_on"])
         self.posture_music_set.emit(self.__settings["posture_music"])
         self.preventive_music_set.emit(self.__settings["preventive_music"])
         

@@ -110,6 +110,18 @@ class MainWindow(QMainWindow):
             if self.camera_manager:
                 self.__settings_page.analysis_frequency_set.connect(self.camera_manager.change_photo_inteval)
             if self.__notification_manager:
+                self.__settings_page.posture_notifications_on.connect(lambda is_on:
+                    self.__notification_manager.set_on_off_notification_category("Нарушение осанки", is_on))
+                
+                self.__settings_page.preventive_notifications_on.connect(lambda is_on:
+                    self.__notification_manager.set_on_off_notification_category("Напоминание", is_on))
+                
+                self.__settings_page.posture_music_on.connect(lambda is_on:
+                    self.__notification_manager.set_on_off_music_notification_category("Нарушение осанки", is_on))
+                
+                self.__settings_page.preventive_music_on.connect(lambda is_on:
+                    self.__notification_manager.set_on_off_music_notification_category("Напоминание", is_on))
+                
                 self.__settings_page.posture_music_set.connect(lambda music_file:
                     self.__notification_manager.set_music_notification_category("Нарушение осанки", music_file))
                 
