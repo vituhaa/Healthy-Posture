@@ -5,6 +5,7 @@ from constants import MAX_PADDING, MIN_PADDING, FONT, WHITE_COLOR
 from widgets.time_counter import TimeCounter
 from widgets.music_button import MusicButton
 from widgets.music_group import MusicGroup
+from widgets.switch_button import SwitchButton
 
 class SettingsPage(QWidget):
     analysis_frequency_set = pyqtSignal(int) # in milliseconds
@@ -21,6 +22,10 @@ class SettingsPage(QWidget):
         self.__preventive_notification_group = None
         self.__apply_button = None
         self.__cancel_button = None
+        self.__posture_notification_switch = None
+        self.__posture_music_switch = None
+        self.__preventive_notification_switch = None
+        self.__preventive_music_switch = None
         
         self.__settings = {"posture_analysis_frequency": 0 # in seconds
                            , "is_posture_notifications_on": True
@@ -83,16 +88,40 @@ class SettingsPage(QWidget):
         # notification settings
         layout.addWidget(notification_label, 0, Qt.AlignmentFlag.AlignLeft)
         
+        posture_layout = QHBoxLayout()
+        posture_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        posture_layout.setContentsMargins(0, 0, 0, 0)
+        posture_layout.setSpacing(MAX_PADDING)
+        
         posture_notification = QLabel("Нарушение осанки")
         posture_notification.setFont(text_font)
-        layout.addWidget(posture_notification, 0, Qt.AlignmentFlag.AlignLeft)
+        posture_layout.addWidget(posture_notification)
+        
+        self.__posture_notification_switch = SwitchButton()
+        posture_layout.addWidget(self.__posture_notification_switch)
+        self.__settings["is_posture_notifications_on"] = self.__posture_notification_switch.get_state()
+        self.__posture_notification_switch.switch_button_on.connect(lambda is_on: self.__switch_button_react(is_on, self.__posture_notification_group))
+        
+        layout.addLayout(posture_layout, 0)
         
         self.__posture_notification_group = self.__create_posture_notification_group()
         layout.addWidget(self.__posture_notification_group, 0, Qt.AlignmentFlag.AlignLeft)
         
+        preventive_layout = QHBoxLayout()
+        preventive_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        preventive_layout.setContentsMargins(0, 0, 0, 0)
+        preventive_layout.setSpacing(MAX_PADDING)
+        
         preventive_notification = QLabel("Напоминание о перерыве")
         preventive_notification.setFont(text_font)
-        layout.addWidget(preventive_notification, 0, Qt.AlignmentFlag.AlignLeft)
+        preventive_layout.addWidget(preventive_notification)
+        
+        self.__preventive_notification_switch = SwitchButton()
+        preventive_layout.addWidget(self.__preventive_notification_switch)
+        self.__settings["is_preventive_notifications_on"] = self.__preventive_notification_switch.get_state()
+        self.__preventive_notification_switch.switch_button_on.connect(lambda is_on: self.__switch_button_react(is_on, self.__preventive_notification_group))
+        
+        layout.addLayout(preventive_layout, 0)
         
         self.__preventive_notification_group = self.__create_preventive_notification_group()
         layout.addWidget(self.__preventive_notification_group, 0, Qt.AlignmentFlag.AlignLeft)
@@ -137,9 +166,21 @@ class SettingsPage(QWidget):
         text_font = QFont(FONT)
         text_font.setPointSize(11)
         
+        sound_layout = QHBoxLayout()
+        sound_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        sound_layout.setContentsMargins(0, 0, 0, 0)
+        sound_layout.setSpacing(MAX_PADDING)
+        
         audio_label = QLabel("Звук")
         audio_label.setFont(text_font)
-        layout.addWidget(audio_label, 0, Qt.AlignmentFlag.AlignLeft)
+        sound_layout.addWidget(audio_label)
+        
+        self.__posture_music_switch = SwitchButton()
+        sound_layout.addWidget(self.__posture_music_switch)
+        self.__settings["is_posture_music_on"] = self.__posture_music_switch.get_state()
+        self.__posture_music_switch.switch_button_on.connect(lambda is_on: self.__switch_button_react(is_on, self.__posture_music_widget))
+        
+        layout.addLayout(sound_layout, 0)
         
         self.__posture_music_widget = MusicGroup()
         self.__create_music_choice(self.__posture_music_widget)
@@ -172,9 +213,21 @@ class SettingsPage(QWidget):
         self.__settings["preventive_notification_frequency"] = 15 * 60
         self.__preventive_notification_frequency.time_changed.connect(lambda time: self.__settings_changed())
         
+        sound_layout = QHBoxLayout()
+        sound_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        sound_layout.setContentsMargins(0, 0, 0, 0)
+        sound_layout.setSpacing(MAX_PADDING)
+        
         audio_label = QLabel("Звук")
         audio_label.setFont(text_font)
-        layout.addWidget(audio_label, 0, Qt.AlignmentFlag.AlignLeft)
+        sound_layout.addWidget(audio_label)
+        
+        self.__preventive_music_switch = SwitchButton()
+        sound_layout.addWidget(self.__preventive_music_switch)
+        self.__settings["is_preventive_music_on"] = self.__preventive_music_switch.get_state()
+        self.__preventive_music_switch.switch_button_on.connect(lambda is_on: self.__switch_button_react(is_on, self.__preventive_music_widget))
+        
+        layout.addLayout(sound_layout, 0)
         
         self.__preventive_music_widget = MusicGroup()
         self.__create_music_choice(self.__preventive_music_widget)
@@ -197,10 +250,26 @@ class SettingsPage(QWidget):
             self.__posture_analysis_frequency.set_total_seconds_value(posture_total_seconds)
             self.analysis_frequency_set.emit(posture_total_seconds * 1000) # in milliseconds
             
+        is_posture_notifications_on = self.__settings["is_posture_notifications_on"]
+        if self.__posture_notification_switch.get_state() != is_posture_notifications_on:
+            self.__posture_notification_switch.set_state(is_posture_notifications_on)
+            
+        is_preventive_notifications_on = self.__settings["is_preventive_notifications_on"]
+        if self.__preventive_notification_switch.get_state() != is_preventive_notifications_on:
+            self.__preventive_notification_switch.set_state(is_preventive_notifications_on)
+            
         preventive_total_seconds = self.__settings["preventive_notification_frequency"]
         if self.__preventive_notification_frequency.get_total_seconds() != preventive_total_seconds:
             self.__preventive_notification_frequency.set_total_seconds_value(preventive_total_seconds)
             self.preventive_frequency_set.emit(preventive_total_seconds * 1000) # in milliseconds
+        
+        is_posture_music_on = self.__settings["is_posture_music_on"]
+        if self.__posture_music_switch.get_state() != is_posture_music_on:
+            self.__posture_music_switch.set_state(is_posture_music_on)
+            
+        is_preventive_music_on = self.__settings["is_preventive_music_on"]
+        if self.__preventive_music_switch.get_state() != is_preventive_music_on:
+            self.__preventive_music_switch.set_state(is_preventive_music_on)
             
         posture_track = self.__settings["posture_music"]
         if self.__posture_music_widget.get_current_track() != posture_track:
@@ -221,12 +290,28 @@ class SettingsPage(QWidget):
         if posture_analysis_new != self.__settings["posture_analysis_frequency"]:
             self.__settings["posture_analysis_frequency"] = posture_analysis_new
             self.analysis_frequency_set.emit(posture_analysis_new * 1000) # in milliseconds
+        
+        is_posture_notifications_on = self.__posture_notification_switch.get_state()
+        if is_posture_notifications_on != self.__settings["is_posture_notifications_on"]:
+            self.__posture_notification_switch.set_state(is_posture_notifications_on)
             
+        is_preventive_notifications_on = self.__preventive_notification_switch.get_state()
+        if is_preventive_notifications_on != self.__settings["is_preventive_notifications_on"]:
+            self.__preventive_notification_switch.set_state(is_preventive_notifications_on)
+                
         preventive_frequency_new = self.__preventive_notification_frequency.get_total_seconds()
         if  preventive_frequency_new != self.__settings["preventive_notification_frequency"]:
             self.__settings["preventive_notification_frequency"] = preventive_frequency_new
             self.preventive_frequency_set.emit(preventive_frequency_new * 1000) # in milliseconds
         
+        is_posture_music_on = self.__posture_music_switch.get_state()
+        if is_posture_music_on != self.__settings["is_posture_music_on"]:
+            self.__posture_music_switch.set_state(is_posture_music_on)
+            
+        is_preventive_music_on = self.__preventive_music_switch.get_state()
+        if is_preventive_music_on != self.__settings["is_preventive_music_on"]:
+            self.__preventive_music_switch.set_state(is_preventive_music_on)
+            
         posture_track_new = self.__posture_music_widget.get_current_track()
         if posture_track_new != self.__settings["posture_music"]:
             self.__settings["posture_music"] = posture_track_new
@@ -245,3 +330,10 @@ class SettingsPage(QWidget):
         self.preventive_frequency_set.emit(self.__settings["preventive_notification_frequency"] * 1000) # in milliseconds
         self.posture_music_set.emit(self.__settings["posture_music"])
         self.preventive_music_set.emit(self.__settings["preventive_music"])
+        
+    def __switch_button_react(self, is_on, widget):
+        if is_on:
+            widget.show()
+        else:
+            widget.hide()
+        self.__settings_changed()
