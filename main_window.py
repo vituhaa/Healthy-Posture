@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QStackedWidget
 from PyQt6.QtCore import Qt, pyqtSignal, QThread, QTimer
 from widgets.photo_page import PhotoPage
+from widgets.analysis_page import AnalysisPage
 from widgets.settings_page import SettingsPage
 from widgets.main_menu import MainMenu
 from notification_manager import NotificationManager
@@ -18,6 +19,7 @@ class MainWindow(QMainWindow):
         
         self.__main_menu = MainMenu()
         self.__photo_page = PhotoPage()
+        self.__analysis_page = AnalysisPage()
         self.__settings_page = SettingsPage()
         self.__stacked_widget = QStackedWidget() # all tabs
         self.__notification_manager = NotificationManager()
@@ -34,15 +36,15 @@ class MainWindow(QMainWindow):
         # test tabs widgets
         prevention = QWidget()
         prevention.setStyleSheet("background-color: white;")
-        analytics = QWidget()
-        analytics.setStyleSheet("background-color: white;")
+        # analytics = QWidget()
+        # analytics.setStyleSheet("background-color: white;")
         about = QWidget()
         about.setStyleSheet("background-color: white;")
         
         # all tabs insertion
         self.__stacked_widget.addWidget(self.__photo_page)
         self.__stacked_widget.addWidget(prevention)
-        self.__stacked_widget.addWidget(analytics)
+        self.__stacked_widget.addWidget(self.__analysis_page)
         self.__stacked_widget.addWidget(about)
         self.__stacked_widget.addWidget(self.__settings_page)
         
