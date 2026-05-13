@@ -21,7 +21,6 @@ class PostureBarChart(QWidget):
         self.__chart = None
         self.__chart_view = None
         self.__create_main_layout()
-        self.adjustSize()
         
     def __create_main_layout(self):
         layout = QVBoxLayout()
@@ -59,6 +58,7 @@ class PostureBarChart(QWidget):
         
         # OX
         axis_x = QBarCategoryAxis()
+        axis_x.setLabelsAngle(-65)
         axis_x.append(self.__time_points)
         axis_x.setLabelsFont(font)
         axis_x.setLabelsBrush(brush)

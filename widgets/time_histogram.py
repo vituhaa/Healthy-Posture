@@ -16,7 +16,6 @@ class TimeHistogram(QWidget):
         self.__chart = None
         self.__chart_view = None
         self.__create_main_layout()
-        self.adjustSize()
         
     def __create_main_layout(self):
         layout = QVBoxLayout()

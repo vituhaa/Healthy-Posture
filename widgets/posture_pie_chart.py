@@ -1,8 +1,8 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
 from PyQt6.QtCharts import QChart, QChartView, QPieSeries, QPieSlice
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont, QBrush, QColor
-from constants import FONT, GREEN_COLOR, WHITE_COLOR
+from PyQt6.QtGui import QFont, QBrush
+from constants import FONT, GREEN_COLOR, RED_COLOR
 
 class PosturePieChart(QWidget):
     def __init__(self, percentage_ideal_posture=0):
@@ -12,7 +12,6 @@ class PosturePieChart(QWidget):
         self.__pie_chart = None
         self.__chart_view = None
         self.__create_main_layout(percentage_ideal_posture)
-        self.adjustSize()
         
     def __create_main_layout(self, percentage_mark):
         layout = QVBoxLayout()
@@ -25,7 +24,6 @@ class PosturePieChart(QWidget):
         font.setBold(True)
         
         brush = QBrush(Qt.GlobalColor.black, Qt.BrushStyle.SolidPattern)
-        darker_white = QColor((WHITE_COLOR.darker(110)))
         
         self.__good_posture_pie_slice = QPieSlice(f"{percentage_mark}% ровная осанка", percentage_mark)
         self.__good_posture_pie_slice.setColor(GREEN_COLOR)
@@ -35,7 +33,7 @@ class PosturePieChart(QWidget):
         self.__good_posture_pie_slice.setLabelVisible(True)
         
         self.__bad_posture_pie_slice = QPieSlice("", 100 - percentage_mark)
-        self.__bad_posture_pie_slice.setColor(darker_white)
+        self.__bad_posture_pie_slice.setColor(RED_COLOR)
         
         font.setBold(False)
         

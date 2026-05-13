@@ -1,11 +1,11 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
 from PyQt6.QtCharts import QChart, QChartView, QBarSeries, QBarSet, QBarCategoryAxis, QValueAxis
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont, QBrush, QColor
-from constants import FONT, GREEN_COLOR, WHITE_COLOR
+from PyQt6.QtGui import QFont, QBrush
+from constants import FONT, GREEN_COLOR
 
 class PostureHistogram(QWidget):
-    def __init__(self, percentage_ideal_posture=0):
+    def __init__(self):
         super().__init__()
         self.__days_of_week = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
         self.__results = [10, 30, 50, 0, 80, 0, 0] # percents per days
@@ -13,10 +13,9 @@ class PostureHistogram(QWidget):
         self.__bar_series = None
         self.__chart = None
         self.__chart_view = None
-        self.__create_main_layout(percentage_ideal_posture)
-        self.adjustSize()
+        self.__create_main_layout()
         
-    def __create_main_layout(self, percentage_mark):
+    def __create_main_layout(self):
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -27,7 +26,7 @@ class PostureHistogram(QWidget):
         brush = QBrush(Qt.GlobalColor.black, Qt.BrushStyle.SolidPattern)
         
         self.__chart = QChart()
-        self.__chart.setTitle("Ровность осанки за неделю")
+        self.__chart.setTitle("Ровность осанки в течение недели")
         self.__chart.setTitleFont(font)
         self.__chart.setTitleBrush(brush)
         self.__chart.legend().setVisible(False)
@@ -60,11 +59,9 @@ class PostureHistogram(QWidget):
         
         # OY
         axis_y = QValueAxis()
-        axis_y.setLabelsFont(font)
-        axis_y.setLabelsBrush(brush)
-        max_value = 100
+        max_value = 100 * 1.2
+        axis_y.setVisible(False)
         axis_y.setRange(0, max_value)
-        axis_y.setLabelFormat("%d")
         
         self.__chart.addAxis(axis_y, Qt.AlignmentFlag.AlignLeft)
         self.__bar_series.attachAxis(axis_y)
