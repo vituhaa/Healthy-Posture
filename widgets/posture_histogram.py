@@ -1,0 +1,85 @@
+from PyQt6.QtWidgets import QWidget, QVBoxLayout
+from PyQt6.QtCharts import QChart, QChartView, QBarSeries, QBarSet, QBarCategoryAxis, QValueAxis
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QFont, QBrush, QColor
+from constants import FONT, GREEN_COLOR, WHITE_COLOR
+
+class PostureHistogram(QWidget):
+    def __init__(self, percentage_ideal_posture=0):
+        super().__init__()
+        self.__days_of_week = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
+        self.__results = [10, 30, 50, 0, 80, 0, 0] # percents per days
+        self.__barset = None
+        self.__bar_series = None
+        self.__chart = None
+        self.__chart_view = None
+        self.__create_main_layout(percentage_ideal_posture)
+        self.adjustSize()
+        
+    def __create_main_layout(self, percentage_mark):
+        layout = QVBoxLayout()
+        layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        
+        font = QFont(FONT)
+        font.setPointSize(12)
+        brush = QBrush(Qt.GlobalColor.black, Qt.BrushStyle.SolidPattern)
+        
+        self.__chart = QChart()
+        self.__chart.setTitle("Ровность осанки за неделю")
+        self.__chart.setTitleFont(font)
+        self.__chart.setTitleBrush(brush)
+        self.__chart.legend().setVisible(False)
+        
+        self.__bar_series = QBarSeries()
+        self.__barset = QBarSet("")
+        self.__barset.setLabelFont(font)
+        self.__barset.setLabelBrush(brush)
+        self.__barset.setColor(GREEN_COLOR)
+        
+        for i in self.__results:
+            self.__barset << i
+            
+        self.__bar_series.append(self.__barset)
+
+        self.__bar_series.setLabelsVisible(True)
+        self.__bar_series.setLabelsPosition(QBarSeries.LabelsPosition.LabelsOutsideEnd)
+        self.__bar_series.setLabelsFormat("@value%")
+        
+        self.__chart.addSeries(self.__bar_series)
+        
+        # OX
+        axis_x = QBarCategoryAxis()
+        axis_x.append(self.__days_of_week)
+        axis_x.setLabelsFont(font)
+        axis_x.setLabelsBrush(brush)
+        
+        self.__chart.addAxis(axis_x, Qt.AlignmentFlag.AlignBottom)
+        self.__bar_series.attachAxis(axis_x)
+        
+        # OY
+        axis_y = QValueAxis()
+        axis_y.setLabelsFont(font)
+        axis_y.setLabelsBrush(brush)
+        max_value = 100
+        axis_y.setRange(0, max_value)
+        axis_y.setLabelFormat("%d")
+        
+        self.__chart.addAxis(axis_y, Qt.AlignmentFlag.AlignLeft)
+        self.__bar_series.attachAxis(axis_y)
+        
+        self.__chart_view = QChartView(self.__chart)
+        
+        layout.addWidget(self.__chart_view, 0)
+        
+        self.setLayout(layout)
+        
+    def set_values_per_week(self, list_values):
+        self.__barset.remove(0, self.__barset.count())
+        
+        for i in list_values:
+            self.__barset << i
+            
+        
+        
