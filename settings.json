@@ -1,0 +1,10 @@
+{
+  "posture_analysis_frequency": 0,
+  "is_posture_notifications_on": true,
+  "is_posture_music_on": true,
+  "posture_music": "",
+  "is_preventive_notifications_on": true,
+  "preventive_notification_frequency": 0,
+  "is_preventive_music_on": true,
+  "preventive_music": ""
+}
