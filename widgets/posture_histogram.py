@@ -13,6 +13,7 @@ class PostureHistogram(QWidget):
         self.__bar_series = None
         self.__chart = None
         self.__chart_view = None
+        self.__axis_x = None
         self.__create_main_layout()
         
     def __create_main_layout(self):
@@ -49,13 +50,13 @@ class PostureHistogram(QWidget):
         self.__chart.addSeries(self.__bar_series)
         
         # OX
-        axis_x = QBarCategoryAxis()
-        axis_x.append(self.__days_of_week)
-        axis_x.setLabelsFont(font)
-        axis_x.setLabelsBrush(brush)
+        self.__axis_x = QBarCategoryAxis()
+        self.__axis_x.append(self.__days_of_week)
+        self.__axis_x.setLabelsFont(font)
+        self.__axis_x.setLabelsBrush(brush)
         
-        self.__chart.addAxis(axis_x, Qt.AlignmentFlag.AlignBottom)
-        self.__bar_series.attachAxis(axis_x)
+        self.__chart.addAxis(self.__axis_x, Qt.AlignmentFlag.AlignBottom)
+        self.__bar_series.attachAxis(self.__axis_x)
         
         # OY
         axis_y = QValueAxis()
@@ -74,9 +75,24 @@ class PostureHistogram(QWidget):
         
     def set_values_per_week(self, list_values):
         self.__barset.remove(0, self.__barset.count())
+        self.__results = list_values
         
-        for i in list_values:
+        for i in self.__results:
             self.__barset << i
+            
+    def set_value_for_day(self, day_index, value):
+        self.__barset.remove(0, self.__barset.count())
+        self.__results[day_index] = value
+        days_of_week = list(self.__days_of_week)
+        days_of_week[day_index] += '*' # today
+        
+        for i in self.__results:
+            self.__barset << i
+            
+        self.__axis_x.clear()
+        self.__axis_x.append(days_of_week)
+            
+        
             
         
         
