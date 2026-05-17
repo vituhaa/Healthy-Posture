@@ -44,6 +44,7 @@ class Calendar(QWidget):
         
     def set_current_date(self, date):
         if self.__calendar:
+            self.__current_date = date
             self.__calendar.setDate(date)
             
     def __update_show_button(self, date):
