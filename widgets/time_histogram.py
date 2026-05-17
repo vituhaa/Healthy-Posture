@@ -15,6 +15,7 @@ class TimeHistogram(QWidget):
         self.__bar_series = None
         self.__chart = None
         self.__chart_view = None
+        self.__axis_y = None
         self.__create_main_layout()
         
     def __create_main_layout(self):
@@ -52,21 +53,21 @@ class TimeHistogram(QWidget):
             self.__chart.addSeries(self.__bar_series)
             
             # OX
-            axis_y = QValueAxis()
-            axis_y.setRange(0, max(self.__seconds_list) * 1.2) # 20% longer for text
-            axis_y.setVisible(False)
+            axis_x = QValueAxis()
+            axis_x.setRange(0, max(self.__seconds_list) * 1.2) # 20% longer for text
+            axis_x.setVisible(False)
             
-            self.__chart.addAxis(axis_y, Qt.AlignmentFlag.AlignBottom)
-            self.__bar_series.attachAxis(axis_y)
+            self.__chart.addAxis(axis_x, Qt.AlignmentFlag.AlignBottom)
+            self.__bar_series.attachAxis(axis_x)
             
             # OY
-            axis_y = QBarCategoryAxis()
-            axis_y.append(self.__days_of_week)
-            axis_y.setLabelsFont(font)
-            axis_y.setLabelsBrush(brush)
+            self.__axis_y = QBarCategoryAxis()
+            self.__axis_y.append(self.__days_of_week)
+            self.__axis_y.setLabelsFont(font)
+            self.__axis_y.setLabelsBrush(brush)
             
-            self.__chart.addAxis(axis_y, Qt.AlignmentFlag.AlignLeft)
-            self.__bar_series.attachAxis(axis_y)
+            self.__chart.addAxis(self.__axis_y, Qt.AlignmentFlag.AlignLeft)
+            self.__bar_series.attachAxis(self.__axis_y)
             
             self.__chart_view = QChartView(self.__chart)
             
@@ -79,6 +80,19 @@ class TimeHistogram(QWidget):
         seconds_values = self.__calculate_time_seconds(list_values)
         for i in seconds_values:
             self.__barset << i
+            
+    def set_value_for_day(self, day_index, value):
+        self.__barset.remove(0, self.__barset.count())
+        self.__time_str[day_index] = value
+        days_of_week = list(self.__days_of_week)
+        days_of_week[day_index] += '*' # today
+        
+        seconds_value = self.__calculate_time_seconds(self.__time_str)
+        for i in seconds_value:
+            self.__barset << i
+            
+        self.__axis_y.clear()
+        self.__axis_y.append(days_of_week)
             
     def __calculate_time_seconds(self, list_time_str):
         seconds_list = []
