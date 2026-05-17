@@ -2,7 +2,7 @@ from PyQt6.QtCore import QObject, QFile
 import json
 
 class JSonManager(QObject):
-    def __init__(self, json_file="statistics.json"):
+    def __init__(self, json_file):
         super().__init__()
         self.__filename = json_file
         self.__file = QFile(self.__filename)
