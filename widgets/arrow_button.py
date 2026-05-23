@@ -22,3 +22,7 @@ class ArrowButton(QToolButton):
         else:
             rotated_pixmap = self.__pixmap
         self.setIcon(QIcon(rotated_pixmap))
+        
+    def set_state(self, is_expanded):
+        if self.__is_expanded != is_expanded:
+            self.__rotate_icon()
