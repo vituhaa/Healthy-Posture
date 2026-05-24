@@ -88,7 +88,10 @@ class MainWindow(QMainWindow):
                 if not is_correct_pose
                 else None
             ), Qt.ConnectionType.QueuedConnection)
-        
+        self.movenet.model_result_signal.connect(
+            lambda answer, is_correct_pose: self.__analysis_page.update_results_counters(is_correct_pose)
+            , Qt.ConnectionType.QueuedConnection
+        )
         self.movenet_thread.finished.connect(self.movenet.deleteLater)
         
         # run threads
@@ -131,6 +134,9 @@ class MainWindow(QMainWindow):
                 self.__settings_page.preventive_frequency_set.connect(lambda interval: (
                     self.__preventive_notification_timer.stop(),
                     self.__preventive_notification_timer.start(interval)))
+                
+            if self.__analysis_page:
+                self.__settings_page.analysis_frequency_set.connect(self.__analysis_page.set_updating_interval)
         
     def closeEvent(self, event):
         self.__preventive_notification_timer.stop()
