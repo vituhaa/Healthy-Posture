@@ -20,6 +20,7 @@ class PostureBarChart(QWidget):
         self.__bar_series = None
         self.__chart = None
         self.__chart_view = None
+        self.__axis_x = None
         self.__create_main_layout()
         
     def __create_main_layout(self):
@@ -57,14 +58,15 @@ class PostureBarChart(QWidget):
         self.__chart.addSeries(self.__bar_series)
         
         # OX
-        axis_x = QBarCategoryAxis()
-        axis_x.setLabelsAngle(-65)
-        axis_x.append(self.__time_points)
-        axis_x.setLabelsFont(font)
-        axis_x.setLabelsBrush(brush)
+        self.__axis_x = QBarCategoryAxis()
+        self.__axis_x.setLabelsAngle(-65)
+        self.__axis_x.append(self.__time_points)
+        font.setPointSize(11)
+        self.__axis_x.setLabelsFont(font)
+        self.__axis_x.setLabelsBrush(brush)
         
-        self.__chart.addAxis(axis_x, Qt.AlignmentFlag.AlignBottom)
-        self.__bar_series.attachAxis(axis_x)
+        self.__chart.addAxis(self.__axis_x, Qt.AlignmentFlag.AlignBottom)
+        self.__bar_series.attachAxis(self.__axis_x)
         
         # OY
         axis_y = QValueAxis()
@@ -81,10 +83,15 @@ class PostureBarChart(QWidget):
         
         self.setLayout(layout)
         
-    def set_values_per_interval(self, list_values):
+    def set_values_per_interval(self, dict_values):
         self.__barset.remove(0, self.__barset.count())
+        self.__time_points = list(dict_values.keys())
+        self.__results = list(dict_values.values())
         
-        for i in list_values:
+        for i in self.__results:
             self.__barset << i
+            
+        self.__axis_x.clear()
+        self.__axis_x.append(self.__time_points)
         
         
