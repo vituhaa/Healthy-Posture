@@ -34,16 +34,11 @@ class MainWindow(QMainWindow):
         self.__connect_settings_signals()
         self.__settings_page.set_start_settings()
         
-    def __insert_tabs(self):    
-        # test tabs widgets
-        about = QWidget()
-        about.setStyleSheet("background-color: white;")
-        
+    def __insert_tabs(self):
         # all tabs insertion
         self.__stacked_widget.addWidget(self.__photo_page)
         self.__stacked_widget.addWidget(self.__preventive_page)
         self.__stacked_widget.addWidget(self.__analysis_page)
-        self.__stacked_widget.addWidget(about)
         self.__stacked_widget.addWidget(self.__settings_page)
         
     def __create_main_layout(self):

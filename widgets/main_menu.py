@@ -13,7 +13,7 @@ class MainMenu(QWidget):
         self.__create_main_layout()
         
     def __init_tabs(self):
-        tabs = ["Главное окно", "Профилактика", "Аналитика", "О себе", "Настройки"]
+        tabs = ["Главное окно", "Профилактика", "Аналитика", "Настройки"]
         self.__text_font.setPointSize(10)
         self.__tab_manager.setFont(self.__text_font)
         self.__tab_manager.addItems(tabs)
