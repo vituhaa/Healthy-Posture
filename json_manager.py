@@ -26,3 +26,19 @@ class JSonManager(QObject):
     
     def set_value(self, key, value):
         self.__data[key] = value
+        
+    def add_new_day_stat(self, day_key):
+        self.__data["month_stat"][day_key] = {
+            "day_number": None,
+            "daily_posture_mark": None,
+            "weelky_posture_stat": None,
+            "weekly_hours_stat": None,
+            "daily_posture_time_stat": None
+        }
+        if len(self.__data["month_stat"]) > 31:
+            first_day = next(iter(self.__data["month_stat"]))
+            self.remove_day(first_day)
+        
+    def remove_day(self, day_key):
+        if day_key in self.__data["month_stat"]:
+            del self.__data["month_stat"][day_key]

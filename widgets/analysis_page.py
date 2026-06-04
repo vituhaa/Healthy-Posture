@@ -87,6 +87,7 @@ class AnalysisPage(QWidget):
             self.__statistics.set_value("current_date", date_str)
             days_count += 1
             self.__statistics.set_value("days_count", days_count)
+            self.__statistics.add_new_day_stat(date_str)
             self.__statistics.save_data()
             
         self.__days_in_app.set_count(days_count)
