@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout
 from PyQt6.QtCharts import QChart, QChartView, QHorizontalBarSeries, QBarSet, QBarCategoryAxis, QValueAxis
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont, QBrush
-from datetime import datetime
+from datetime import datetime, timedelta
 from constants import FONT, GREEN_COLOR
 
 class TimeHistogram(QWidget):
@@ -75,11 +75,17 @@ class TimeHistogram(QWidget):
         
         self.setLayout(layout)
         
-    def set_values_per_week(self, list_values):
+    def set_values_per_week(self, day_index, list_values):
         self.__barset.remove(0, self.__barset.count())
-        seconds_values = self.__calculate_time_seconds(list_values)
-        for i in seconds_values:
+        self.__time_str = self.__calculate_time_strs(list_values)
+        days_of_week = list(self.__days_of_week)
+        days_of_week[day_index] += '*' # today
+        
+        for i in list_values:
             self.__barset << i
+            
+        self.__axis_y.clear()
+        self.__axis_y.append(days_of_week)
             
     def set_value_for_day(self, day_index, value):
         self.__barset.remove(0, self.__barset.count())
@@ -101,6 +107,18 @@ class TimeHistogram(QWidget):
                 time = datetime.strptime(list_time_str[i], '%H:%M:%S')
                 seconds_list.append(time.hour * 3600 + time.minute * 60 + time.second)
         return seconds_list
+    
+    def __calculate_time_strs(self, list_time_seconds):
+        time_strs = []
+        for seconds in list_time_seconds:
+            td = timedelta(seconds=seconds)
+            total_seconds = int(td.total_seconds())
+            hours = total_seconds // 3600
+            minutes = (total_seconds % 3600) // 60
+            secs = total_seconds % 60
+            time_strs.append(f"{hours:02d}:{minutes:02d}:{secs:02d}")
+        return time_strs
+        
     
     def __is_correct_time(self, time_str):
         try:

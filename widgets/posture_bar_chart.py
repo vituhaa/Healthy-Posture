@@ -15,7 +15,7 @@ class PostureBarChart(QWidget):
             "12:40-12:50", 
             "12:50-13:00"
         ]
-        self.__results = [10, 30, 50, 40, 80, 37, 90] # percents per days
+        self.__results = [10, 30, 50, 40, 80, 37] # percents per days
         self.__barset = None
         self.__bar_series = None
         self.__chart = None
@@ -85,8 +85,12 @@ class PostureBarChart(QWidget):
         
     def set_values_per_interval(self, dict_values):
         self.__barset.remove(0, self.__barset.count())
-        self.__time_points = list(dict_values.keys())
-        self.__results = list(dict_values.values())
+        if dict_values:
+            self.__time_points = list(dict_values.keys())
+            self.__results = list(dict_values.values())
+        else:
+            self.__time_points = [" *", "* ", "  *", "*  ", " * ", " *  "]
+            self.__results = [0, 0, 0, 0, 0, 0]
         
         for i in self.__results:
             self.__barset << i

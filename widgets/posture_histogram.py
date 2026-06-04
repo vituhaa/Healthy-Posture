@@ -73,12 +73,17 @@ class PostureHistogram(QWidget):
         
         self.setLayout(layout)
         
-    def set_values_per_week(self, list_values):
+    def set_values_per_week(self, day_index, list_values):
         self.__barset.remove(0, self.__barset.count())
         self.__results = list_values
+        days_of_week = list(self.__days_of_week)
+        days_of_week[day_index] += '*' # today
         
         for i in self.__results:
             self.__barset << i
+            
+        self.__axis_x.clear()
+        self.__axis_x.append(days_of_week)
             
     def set_value_for_day(self, day_index, value):
         self.__barset.remove(0, self.__barset.count())
