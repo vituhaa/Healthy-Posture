@@ -36,9 +36,12 @@ class JSonManager(QObject):
             "daily_posture_time_stat": None
         }
         if len(self.__data["month_stat"]) > 31:
-            first_day = next(iter(self.__data["month_stat"]))
+            first_day = self.get_first_day_key()
             self.remove_day(first_day)
         
     def remove_day(self, day_key):
         if day_key in self.__data["month_stat"]:
             del self.__data["month_stat"][day_key]
+            
+    def get_first_day_key(self):
+        return next(iter(self.__data["month_stat"]))

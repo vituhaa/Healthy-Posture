@@ -29,6 +29,7 @@ class Calendar(QWidget):
         
         self.__calendar = QDateEdit(self.__current_date)
         self.__calendar.setDateRange(self.__start_date, self.__end_date)
+        self.__calendar.setCalendarPopup(True)
         self.__calendar.dateChanged.connect(self.__update_show_button)
         
         layout.addWidget(self.__calendar, 0, Qt.AlignmentFlag.AlignHCenter)

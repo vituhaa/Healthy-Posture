@@ -92,10 +92,18 @@ class AnalysisPage(QWidget):
             
         self.__days_in_app.set_count(days_count)
         
+        first_date = self.__statistics.get_first_day_key()
+        print(first_date)
+        first_date_list = first_date.split(".")
+        y_1 = int(first_date_list[2])
+        m_1 = int(first_date_list[1])
+        d_1 = int(first_date_list[0])
+        
         date_list = date_str.split(".")
         y = int(date_list[2])
         m = int(date_list[1])
         d = int(date_list[0])
+        self.__calendar.set_date_range(QDate(y_1, m_1, d_1), QDate(y, m, d))
         self.__calendar.set_current_date(QDate(y, m, d))
             
     def __update_daily_posture_mark(self):
