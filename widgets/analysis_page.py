@@ -88,12 +88,12 @@ class AnalysisPage(QWidget):
             days_count += 1
             self.__statistics.set_value("days_count", days_count)
             self.__statistics.add_new_day_stat(date_str)
+            self.__statistics.set_month_stat_value(date_str, "day_number", self.__day_of_week)
             self.__statistics.save_data()
             
         self.__days_in_app.set_count(days_count)
         
         first_date = self.__statistics.get_first_day_key()
-        print(first_date)
         first_date_list = first_date.split(".")
         y_1 = int(first_date_list[2])
         m_1 = int(first_date_list[1])
