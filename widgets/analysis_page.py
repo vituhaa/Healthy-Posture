@@ -38,6 +38,7 @@ class AnalysisPage(QWidget):
         self.__day_of_week = 0
         self.__time_start = None # today using app in seconds
         self.__bar_chart_dict = {} # dict for daily posture time stat
+        self.__is_current_stat = True
         self.__create_main_layout()
         self.__update_days_count()
         
@@ -125,17 +126,30 @@ class AnalysisPage(QWidget):
             
     def __update_daily_posture_mark(self):
         good_posture_percent = int(self.__good_results_count / self.__total_results_count * 100)
-        self.__daily_posture_mark.set_posture_mark(good_posture_percent)
+        today = self.__statistics.get_value("current_date")
+        self.__statistics.set_month_stat_value(today, "daily_posture_mark", good_posture_percent)
+        if self.__is_current_stat:
+            self.__daily_posture_mark.set_posture_mark(good_posture_percent)
         
-    def __update_weekly_posture_start(self):
+    def __update_weekly_posture_stat(self):
         good_posture_percent = int(self.__good_results_count / self.__total_results_count * 100)
-        self.__weekly_posture_stat.set_value_for_day(self.__day_of_week, good_posture_percent)
+        today = self.__statistics.get_value("current_date")
+        marks_list = self.__statistics.get_month_stat_value(today, "weekly_posture_stat")
+        marks_list[self.__day_of_week] = good_posture_percent
+        self.__statistics.set_month_stat_value(today, "weekly_posture_stat", marks_list)
+        if self.__is_current_stat:
+            self.__weekly_posture_stat.set_value_for_day(self.__day_of_week, good_posture_percent)
         
     def __update_weekly_hours_stat(self):
         time_end = datetime.now()
         delta = time_end - self.__time_start
         seconds_str = str(delta).split('.')[0]
-        self.__weekly_hours_stat.set_value_for_day(self.__day_of_week, seconds_str)
+        today = self.__statistics.get_value("current_date")
+        hours_list = self.__statistics.get_month_stat_value(today, "weekly_hours_stat")
+        hours_list[self.__day_of_week] = int(delta.total_seconds())
+        self.__statistics.set_month_stat_value(today, "weekly_hours_stat", hours_list)
+        if self.__is_current_stat:
+            self.__weekly_hours_stat.set_value_for_day(self.__day_of_week, seconds_str)
         
             
     def set_updating_interval(self, ms):
@@ -181,8 +195,9 @@ class AnalysisPage(QWidget):
             self.__interval_results_count = 0
             # update statistics
             self.__update_daily_posture_mark()
-            self.__update_weekly_posture_start()
+            self.__update_weekly_posture_stat()
             self.__update_weekly_hours_stat()
+            self.__statistics.save_data()
             
     def update_results_counters(self, is_correct_pose):
         if is_correct_pose:
@@ -196,8 +211,9 @@ class AnalysisPage(QWidget):
             self.__interval_results_count = 0
             # update statistics
             self.__update_daily_posture_mark()
-            self.__update_weekly_posture_start()
+            self.__update_weekly_posture_stat()
             self.__update_weekly_hours_stat()
+            self.__statistics.save_data()
         
         if self.__current_periods_count < self.__periods_count:
             if self.__current_measurements_count < self.__measurements_count:
@@ -222,5 +238,9 @@ class AnalysisPage(QWidget):
                 self.__periods_count = self.__periods_count_new
                 self.__measurements_count = self.__measurements_count_new
             # update dynamic bar chart
-            self.__daily_posture_time_stat.set_values_per_interval(self.__bar_chart_dict)
-            self.__bar_chart_dict.clear()
+            today = self.__statistics.get_value("current_date")
+            self.__statistics.set_month_stat_value(today, "daily_posture_time_stat", self.__bar_chart_dict)
+            if self.__is_current_stat:
+                self.__daily_posture_time_stat.set_values_per_interval(self.__bar_chart_dict)
+                self.__bar_chart_dict.clear()
+            self.__statistics.save_data()

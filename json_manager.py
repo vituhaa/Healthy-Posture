@@ -52,6 +52,14 @@ class JSonManager(QObject):
     def set_month_stat_value(self, day_key, feature_key, value):
         if day_key in self.__data["month_stat"] and feature_key in self.__data["month_stat"][day_key]:
             self.__data["month_stat"][day_key][feature_key] = value
+            if feature_key == "weekly_posture_stat" or feature_key == "weekly_hours_stat":
+                dt = datetime.strptime(day_key, "%d.%m.%Y")
+                start = dt - timedelta(days=dt.weekday())
+                while start != dt:
+                    date_string = start.strftime("%d.%m.%Y")
+                    if date_string in self.__data["month_stat"]:
+                        self.__data["month_stat"][date_string][feature_key] = value
+                    start += timedelta(days=1)
             
     def get_month_stat_value(self, day_key, feature_key):
         if day_key in self.__data["month_stat"] and feature_key in self.__data["month_stat"][day_key]:
