@@ -16,6 +16,7 @@ class TimeHistogram(QWidget):
         self.__chart = None
         self.__chart_view = None
         self.__axis_y = None
+        self.__axis_x = None
         self.__create_main_layout()
         
     def __create_main_layout(self):
@@ -53,12 +54,12 @@ class TimeHistogram(QWidget):
             self.__chart.addSeries(self.__bar_series)
             
             # OX
-            axis_x = QValueAxis()
-            axis_x.setRange(0, max(self.__seconds_list) * 1.2) # 20% longer for text
-            axis_x.setVisible(False)
+            self.__axis_x = QValueAxis()
+            self.__axis_x.setRange(0, max(self.__seconds_list) * 1.2) # 20% longer for text
+            self.__axis_x.setVisible(False)
             
-            self.__chart.addAxis(axis_x, Qt.AlignmentFlag.AlignBottom)
-            self.__bar_series.attachAxis(axis_x)
+            self.__chart.addAxis(self.__axis_x, Qt.AlignmentFlag.AlignBottom)
+            self.__bar_series.attachAxis(self.__axis_x)
             
             # OY
             self.__axis_y = QBarCategoryAxis()
@@ -83,7 +84,8 @@ class TimeHistogram(QWidget):
         
         for i in list_values:
             self.__barset << i
-            
+        
+        self.__axis_x.setRange(0, max(list_values) * 1.2) # 20% longer for text    
         self.__axis_y.clear()
         self.__axis_y.append(days_of_week)
             
@@ -97,6 +99,7 @@ class TimeHistogram(QWidget):
         for i in seconds_value:
             self.__barset << i
             
+        self.__axis_x.setRange(0, max(seconds_value) * 1.2) # 20% longer for text    
         self.__axis_y.clear()
         self.__axis_y.append(days_of_week)
             

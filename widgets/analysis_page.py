@@ -146,10 +146,10 @@ class AnalysisPage(QWidget):
         seconds_str = str(delta).split('.')[0]
         today = self.__statistics.get_value("current_date")
         hours_list = self.__statistics.get_month_stat_value(today, "weekly_hours_stat")
-        hours_list[self.__day_of_week] = int(delta.total_seconds())
+        hours_list[self.__day_of_week] += int(delta.total_seconds())
         self.__statistics.set_month_stat_value(today, "weekly_hours_stat", hours_list)
         if self.__is_current_stat:
-            self.__weekly_hours_stat.set_value_for_day(self.__day_of_week, seconds_str)
+            self.__weekly_hours_stat.set_values_per_week(self.__day_of_week, hours_list)
         
             
     def set_updating_interval(self, ms):
