@@ -124,12 +124,17 @@ class AnalysisPage(QWidget):
         daily_posture_time_stat = self.__statistics.get_month_stat_value(date_str, "daily_posture_time_stat")
         self.__daily_posture_time_stat.set_values_per_interval(daily_posture_time_stat)
         
+        self.__total_results_count = self.__statistics.get_month_stat_value(date_str, "total_results")
+        self.__good_results_count = self.__statistics.get_month_stat_value(date_str, "good_posture_results")
+        
         self.__calendar.date_chose.connect(self.__update_stat_by_date)
             
     def __update_daily_posture_mark(self):
         good_posture_percent = int(self.__good_results_count / self.__total_results_count * 100)
         today = self.__statistics.get_value("current_date")
         self.__statistics.set_month_stat_value(today, "daily_posture_mark", good_posture_percent)
+        self.__statistics.set_month_stat_value(today, "total_results", self.__total_results_count)
+        self.__statistics.set_month_stat_value(today, "good_posture_results", self.__good_results_count)
         if self.__is_current_stat:
             self.__daily_posture_mark.set_posture_mark(good_posture_percent)
         

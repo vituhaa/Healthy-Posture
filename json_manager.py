@@ -31,6 +31,8 @@ class JSonManager(QObject):
     def add_new_day_stat(self, day_key):
         self.__data["month_stat"][day_key] = {
             "day_number": None,
+            "total_results": 0,
+            "good_posture_results": 0,
             "daily_posture_mark": None,
             "weekly_posture_stat": None,
             "weekly_hours_stat": None,
