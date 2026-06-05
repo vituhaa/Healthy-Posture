@@ -123,6 +123,8 @@ class AnalysisPage(QWidget):
             
         daily_posture_time_stat = self.__statistics.get_month_stat_value(date_str, "daily_posture_time_stat")
         self.__daily_posture_time_stat.set_values_per_interval(daily_posture_time_stat)
+        
+        self.__calendar.date_chose.connect(self.__update_stat_by_date)
             
     def __update_daily_posture_mark(self):
         good_posture_percent = int(self.__good_results_count / self.__total_results_count * 100)
@@ -150,7 +152,24 @@ class AnalysisPage(QWidget):
         self.__statistics.set_month_stat_value(today, "weekly_hours_stat", hours_list)
         if self.__is_current_stat:
             self.__weekly_hours_stat.set_values_per_week(self.__day_of_week, hours_list)
+            
+    def __update_stat_by_date(self, date_str):
+        today = self.__statistics.get_value("current_date")
+        if date_str != today:
+            self.__is_current_stat = False
+        else:
+            self.__is_current_stat = True
+            
+        day_number = self.__statistics.get_month_stat_value(date_str, "day_number")
+        daily_posture_mark = self.__statistics.get_month_stat_value(date_str, "daily_posture_mark")
+        daily_posture_time_stat = self.__statistics.get_month_stat_value(date_str, "daily_posture_time_stat")
+        weekly_posture_stat = self.__statistics.get_month_stat_value(date_str, "weekly_posture_stat")
+        weekly_hours_stat = self.__statistics.get_month_stat_value(date_str, "weekly_hours_stat")
         
+        self.__daily_posture_mark.set_posture_mark(daily_posture_mark)
+        self.__daily_posture_time_stat.set_values_per_interval(daily_posture_time_stat)
+        self.__weekly_posture_stat.set_values_per_week(day_number, weekly_posture_stat)
+        self.__weekly_hours_stat.set_values_per_week(day_number, weekly_hours_stat)
             
     def set_updating_interval(self, ms):
         seconds = ms // 1000

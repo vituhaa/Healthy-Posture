@@ -1,9 +1,10 @@
 from PyQt6.QtWidgets import QWidget, QLabel, QDateEdit, QVBoxLayout, QPushButton
-from PyQt6.QtCore import Qt, QDate
+from PyQt6.QtCore import Qt, QDate, pyqtSignal
 from PyQt6.QtGui import QFont
 from constants import MAX_PADDING, FONT
 
 class Calendar(QWidget):
+    date_chose = pyqtSignal(str)
     def __init__(self):
         super().__init__()
         self.__start_date = QDate(2026, 5, 1)
@@ -36,6 +37,7 @@ class Calendar(QWidget):
         
         self.__show_button.setEnabled(False)
         layout.addWidget(self.__show_button, 0, Qt.AlignmentFlag.AlignHCenter)
+        self.__show_button.clicked.connect(self.__apply_date)
         
         self.setLayout(layout)
         
@@ -49,7 +51,12 @@ class Calendar(QWidget):
             self.__calendar.setDate(date)
             
     def __update_show_button(self, date):
-        if date != self.__current_date:
-            self.__show_button.setEnabled(True)
-        else:
-            self.__show_button.setEnabled(False)
+        self.__show_button.setEnabled(True)
+        # if date != self.__current_date:
+        #     self.__show_button.setEnabled(True)
+        # else:
+        #     self.__show_button.setEnabled(False)
+    
+    def __apply_date(self):
+        date_str = self.__calendar.date().toString("dd.MM.yyyy")
+        self.date_chose.emit(date_str)
